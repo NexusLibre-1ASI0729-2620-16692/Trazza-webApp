@@ -1,0 +1,9 @@
+<section class="trazza-page not-found">
+  <mat-icon class="not-found-icon" aria-hidden="true">explore_off</mat-icon>
+  <h1>{{ 'page-not-found.title' | translate }}</h1>
+  <p class="trazza-muted">{{ 'page-not-found.content' | translate: { unavailable_route: invalidPath } }}</p>
+  <button mat-flat-button type="button" (click)="navigateToHome()">
+    <mat-icon>home</mat-icon>
+    {{ 'page-not-found.go-home' | translate }}
+  </button>
+</section>

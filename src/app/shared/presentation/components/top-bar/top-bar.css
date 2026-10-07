@@ -1,0 +1,50 @@
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 4rem;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--trazza-line);
+}
+
+.page-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-chip {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.alerts-panel {
+  width: 20rem;
+  max-width: 80vw;
+  padding: 0.75rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .user-chip {
+    display: flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .menu-toggle {
+    display: none;
+  }
+}

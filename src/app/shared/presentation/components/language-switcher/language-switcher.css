@@ -1,0 +1,8 @@
+.language-toggle {
+  --mat-button-toggle-height: 32px;
+  --mat-button-toggle-selected-state-background-color: #0037b0;
+  --mat-button-toggle-selected-state-text-color: #ffffff;
+  --mat-button-toggle-shape: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

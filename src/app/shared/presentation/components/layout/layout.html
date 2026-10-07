@@ -1,0 +1,31 @@
+@if (iamStore.isSignedIn()) {
+  <mat-sidenav-container class="app-shell">
+    <mat-sidenav [mode]="isDesktop() ? 'side' : 'over'"
+                 [opened]="isDesktop() || drawerOpened()"
+                 (closedStart)="drawerOpened.set(false)"
+                 class="app-sidenav">
+      <app-side-menu (navigate)="closeDrawer()"/>
+    </mat-sidenav>
+    <mat-sidenav-content class="app-content">
+      <app-top-bar (toggleMenu)="toggleDrawer()"/>
+      <main id="main-content">
+        <router-outlet/>
+      </main>
+      <app-footer-content/>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+} @else {
+  <div class="auth-shell">
+    <header class="auth-header">
+      <div class="row">
+        <img src="/trazza-logo.svg" alt="" width="32" height="32">
+        <span class="auth-brand">Trazza</span>
+      </div>
+      <app-language-switcher/>
+    </header>
+    <main id="main-content" class="auth-main">
+      <router-outlet/>
+    </main>
+    <app-footer-content/>
+  </div>
+}

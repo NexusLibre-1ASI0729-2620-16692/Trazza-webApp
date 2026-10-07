@@ -1,0 +1,13 @@
+<mat-button-toggle-group [value]="locale.language()"
+                         hideSingleSelectionIndicator
+                         [attr.aria-label]="'menu.language' | translate"
+                         name="language"
+                         class="language-toggle">
+  @for (language of locale.languages; track language) {
+    <mat-button-toggle [value]="language"
+                       [attr.aria-label]="'languages.' + language | translate"
+                       (change)="useLanguage(language)">
+      {{ language.toUpperCase() }}
+    </mat-button-toggle>
+  }
+</mat-button-toggle-group>

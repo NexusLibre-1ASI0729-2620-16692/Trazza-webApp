@@ -1,0 +1,15 @@
+.footer-content {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--trazza-muted);
+  padding: 1rem;
+}
+
+.footer-content p {
+  margin: 0.15rem 0;
+}
+
+.footer-content a {
+  color: var(--trazza-accent);
+  font-weight: 600;
+}

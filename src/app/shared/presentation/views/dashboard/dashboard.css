@@ -1,0 +1,24 @@
+.suggestion-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--trazza-line);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.suggestion-row:hover,
+.suggestion-row:focus-visible {
+  background: #f0f3ff;
+  outline: none;
+}
+
+.block {
+  display: block;
+}

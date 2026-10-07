@@ -1,0 +1,25 @@
+.address-fieldset {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.address-legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #434655;
+  margin-bottom: 0.35rem;
+  padding: 0;
+}
+
+.address-grid {
+  display: grid;
+  gap: 0 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .address-grid {
+    grid-template-columns: 7fr 5fr;
+  }
+}

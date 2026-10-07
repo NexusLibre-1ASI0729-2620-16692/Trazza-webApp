@@ -1,0 +1,1040 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "fullName": "Juan David Ramos",
+      "email": "juan.ramos@email.com",
+      "phone": "987654321",
+      "role": "carrier",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-10T15:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "fullName": "Valeria Torres",
+      "email": "valeria.torres@email.com",
+      "phone": "987123456",
+      "role": "merchant",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-12T14:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "fullName": "Carlos Mendoza",
+      "email": "carlos.mendoza@email.com",
+      "phone": "986111222",
+      "role": "carrier",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-20T14:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "fullName": "Pedro Quispe",
+      "email": "pedro.quispe@email.com",
+      "phone": "985333444",
+      "role": "carrier",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-21T14:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "fullName": "Camila Rojas",
+      "email": "camila.rojas@email.com",
+      "phone": "984555666",
+      "role": "merchant",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-25T14:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "fullName": "Luis Ferrer",
+      "email": "luis.ferrer@email.com",
+      "phone": "983777888",
+      "role": "merchant",
+      "password": "Trazza2026",
+      "createdAt": "2026-08-26T14:00:00.000Z"
+    }
+  ],
+  "carrier-profiles": [
+    {
+      "id": 1,
+      "userId": 1,
+      "fullName": "Juan David Ramos",
+      "dni": "45678912",
+      "phone": "987654321",
+      "verified": true,
+      "vehicles": [
+        {
+          "id": 1,
+          "plate": "ABC-123",
+          "brandModel": "Isuzu NPR",
+          "bodyType": "closed_van",
+          "capacityKg": 3500,
+          "volumeM3": 18,
+          "active": true
+        },
+        {
+          "id": 2,
+          "plate": "XYZ-456",
+          "brandModel": "Hino 300",
+          "bodyType": "flatbed",
+          "capacityKg": 4500,
+          "volumeM3": 24,
+          "active": false
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "userId": 3,
+      "fullName": "Carlos Mendoza",
+      "dni": "41234567",
+      "phone": "986111222",
+      "verified": true,
+      "vehicles": [
+        {
+          "id": 1,
+          "plate": "CMD-210",
+          "brandModel": "Hyundai HD65",
+          "bodyType": "closed_van",
+          "capacityKg": 2500,
+          "volumeM3": 14,
+          "active": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "userId": 4,
+      "fullName": "Pedro Quispe",
+      "dni": "47654321",
+      "phone": "985333444",
+      "verified": true,
+      "vehicles": [
+        {
+          "id": 1,
+          "plate": "PQS-778",
+          "brandModel": "Hino 300",
+          "bodyType": "box_truck",
+          "capacityKg": 4000,
+          "volumeM3": 20,
+          "active": true
+        }
+      ]
+    }
+  ],
+  "merchant-profiles": [
+    {
+      "id": 1,
+      "userId": 2,
+      "businessName": "Textiles Andinos SAC",
+      "contactName": "Valeria Torres",
+      "ruc": "20601234567",
+      "phone": "987123456",
+      "verified": true
+    },
+    {
+      "id": 2,
+      "userId": 5,
+      "businessName": "Dulces Camila",
+      "contactName": "Camila Rojas",
+      "ruc": "10456789012",
+      "phone": "984555666",
+      "verified": true
+    },
+    {
+      "id": 3,
+      "userId": 6,
+      "businessName": "Ferretería Norte EIRL",
+      "contactName": "Luis Ferrer",
+      "ruc": "20509876543",
+      "phone": "983777888",
+      "verified": true
+    }
+  ],
+  "return-routes": [
+    {
+      "id": 1,
+      "carrierId": 1,
+      "vehicleId": 1,
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "origin": {
+        "street": "Av. Industrial 120",
+        "district": "Lurín"
+      },
+      "destination": {
+        "street": "Av. Carlos Izaguirre 455",
+        "district": "Los Olivos"
+      },
+      "departureDate": "2026-10-08",
+      "timeWindow": {
+        "start": "16:00",
+        "end": "18:00"
+      },
+      "availableWeightKg": 1200,
+      "availableVolumeM3": 6,
+      "maxDetourKm": 15,
+      "acceptedCargoTypes": [
+        "general",
+        "textiles",
+        "food",
+        "fragile",
+        "hardware"
+      ],
+      "status": "active",
+      "distanceKm": 52.3,
+      "durationMinutes": 105,
+      "createdAt": "2026-10-04T13:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "carrierId": 1,
+      "vehicleId": 1,
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "origin": {
+        "street": "Av. Néstor Gambetta 3200",
+        "district": "Callao"
+      },
+      "destination": {
+        "street": "Av. Carlos Izaguirre 455",
+        "district": "Los Olivos"
+      },
+      "departureDate": "2026-10-05",
+      "timeWindow": {
+        "start": "15:00",
+        "end": "17:00"
+      },
+      "availableWeightKg": 0,
+      "availableVolumeM3": 0,
+      "maxDetourKm": 20,
+      "acceptedCargoTypes": [
+        "general",
+        "textiles"
+      ],
+      "status": "matched",
+      "distanceKm": 15.6,
+      "durationMinutes": 31,
+      "createdAt": "2026-10-02T12:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "carrierId": 3,
+      "vehicleId": 1,
+      "vehicleLabel": "Hyundai HD65 · CMD-210",
+      "origin": {
+        "street": "Carretera Central km 34",
+        "district": "Chosica"
+      },
+      "destination": {
+        "street": "Av. Huaylas 1200",
+        "district": "Chorrillos"
+      },
+      "departureDate": "2026-10-08",
+      "timeWindow": {
+        "start": "10:00",
+        "end": "12:00"
+      },
+      "availableWeightKg": 900,
+      "availableVolumeM3": 8,
+      "maxDetourKm": 15,
+      "acceptedCargoTypes": [
+        "general",
+        "textiles"
+      ],
+      "status": "active",
+      "distanceKm": 56.1,
+      "durationMinutes": 112,
+      "createdAt": "2026-10-04T15:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "carrierId": 4,
+      "vehicleId": 1,
+      "vehicleLabel": "Hino 300 · PQS-778",
+      "origin": {
+        "street": "Av. Los Ruiseñores 820",
+        "district": "Santa Anita"
+      },
+      "destination": {
+        "street": "Av. Grau 340",
+        "district": "Barranco"
+      },
+      "departureDate": "2026-10-08",
+      "timeWindow": {
+        "start": "09:30",
+        "end": "11:30"
+      },
+      "availableWeightKg": 1500,
+      "availableVolumeM3": 10,
+      "maxDetourKm": 20,
+      "acceptedCargoTypes": [
+        "general",
+        "textiles",
+        "hardware"
+      ],
+      "status": "active",
+      "distanceKm": 16.9,
+      "durationMinutes": 34,
+      "createdAt": "2026-10-04T16:00:00.000Z"
+    }
+  ],
+  "freight-requests": [
+    {
+      "id": 1,
+      "code": "LD-1042",
+      "merchantId": 2,
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Universitaria 1500",
+        "district": "San Martín de Porres"
+      },
+      "pickupDate": "2026-10-08",
+      "pickupWindow": {
+        "start": "16:30",
+        "end": "17:00"
+      },
+      "cargo": {
+        "type": "textiles",
+        "weightKg": 800,
+        "volumeM3": 4,
+        "description": "20 bales of fabric. Keep dry. Loading ramp available."
+      },
+      "offeredRate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "status": "open",
+      "distanceKm": 23.1,
+      "createdAt": "2026-10-04T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "code": "LD-1043",
+      "merchantId": 6,
+      "pickup": {
+        "street": "Av. Los Frutales 330",
+        "district": "Santa Anita"
+      },
+      "delivery": {
+        "street": "Av. Túpac Amaru 2400",
+        "district": "Comas"
+      },
+      "pickupDate": "2026-10-08",
+      "pickupWindow": {
+        "start": "16:45",
+        "end": "17:15"
+      },
+      "cargo": {
+        "type": "hardware",
+        "weightKg": 1100,
+        "volumeM3": 5,
+        "description": "Pallets of construction hardware."
+      },
+      "offeredRate": {
+        "amount": 220,
+        "currency": "PEN"
+      },
+      "status": "open",
+      "distanceKm": 19.3,
+      "createdAt": "2026-10-04T11:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "code": "LD-1044",
+      "merchantId": 5,
+      "pickup": {
+        "street": "Av. Angamos Este 980",
+        "district": "Surquillo"
+      },
+      "delivery": {
+        "street": "Av. Industrial 3500",
+        "district": "Independencia"
+      },
+      "pickupDate": "2026-10-08",
+      "pickupWindow": {
+        "start": "16:15",
+        "end": "16:45"
+      },
+      "cargo": {
+        "type": "food",
+        "weightKg": 120,
+        "volumeM3": 1,
+        "description": "Boxes of artisan sweets. Fragile."
+      },
+      "offeredRate": {
+        "amount": 90,
+        "currency": "PEN"
+      },
+      "status": "open",
+      "distanceKm": 18.4,
+      "createdAt": "2026-10-04T12:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "code": "FR-2210",
+      "merchantId": 2,
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Larco 345",
+        "district": "Miraflores"
+      },
+      "pickupDate": "2026-10-08",
+      "pickupWindow": {
+        "start": "10:00",
+        "end": "12:00"
+      },
+      "cargo": {
+        "type": "textiles",
+        "weightKg": 800,
+        "volumeM3": 4,
+        "description": "20 bales of fabric. Keep dry."
+      },
+      "offeredRate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "status": "open",
+      "distanceKm": 21.0,
+      "createdAt": "2026-10-04T09:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "code": "FR-2201",
+      "merchantId": 2,
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Benavides 1555",
+        "district": "Miraflores"
+      },
+      "pickupDate": "2026-10-05",
+      "pickupWindow": {
+        "start": "16:00",
+        "end": "17:00"
+      },
+      "cargo": {
+        "type": "textiles",
+        "weightKg": 800,
+        "volumeM3": 4,
+        "description": "20 bales of fabric."
+      },
+      "offeredRate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "status": "matched",
+      "distanceKm": 21.0,
+      "createdAt": "2026-10-01T09:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "code": "FR-2215",
+      "merchantId": 2,
+      "pickup": {
+        "street": "Jr. Gamarra 650",
+        "district": "La Victoria"
+      },
+      "delivery": {
+        "street": "Av. Primavera 1200",
+        "district": "Santiago de Surco"
+      },
+      "pickupDate": "2026-10-09",
+      "pickupWindow": {
+        "start": "09:00",
+        "end": "11:00"
+      },
+      "cargo": {
+        "type": "textiles",
+        "weightKg": 300,
+        "volumeM3": 2,
+        "description": "Boxed garments."
+      },
+      "offeredRate": null,
+      "status": "draft",
+      "distanceKm": 12.5,
+      "createdAt": "2026-10-05T09:00:00.000Z"
+    }
+  ],
+  "match-proposals": [
+    {
+      "id": 1,
+      "freightRequestId": 5,
+      "returnRouteId": 2,
+      "carrierId": 1,
+      "merchantId": 2,
+      "initiatedBy": "carrier",
+      "currentRate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "previousRate": null,
+      "lastOfferBy": "carrier",
+      "status": "matched",
+      "detour": {
+        "distanceKm": 9.8,
+        "durationMinutes": 20
+      },
+      "createdAt": "2026-10-03T10:00:00.000Z",
+      "updatedAt": "2026-10-03T11:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "freightRequestId": 4,
+      "returnRouteId": 3,
+      "carrierId": 3,
+      "merchantId": 2,
+      "initiatedBy": "carrier",
+      "currentRate": {
+        "amount": 200,
+        "currency": "PEN"
+      },
+      "previousRate": null,
+      "lastOfferBy": "carrier",
+      "status": "pending",
+      "detour": {
+        "distanceKm": 5.1,
+        "durationMinutes": 10
+      },
+      "createdAt": "2026-10-04T16:00:00.000Z",
+      "updatedAt": "2026-10-04T16:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "freightRequestId": 4,
+      "returnRouteId": 4,
+      "carrierId": 4,
+      "merchantId": 2,
+      "initiatedBy": "carrier",
+      "currentRate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "previousRate": null,
+      "lastOfferBy": "carrier",
+      "status": "accepted",
+      "detour": {
+        "distanceKm": 16.3,
+        "durationMinutes": 33
+      },
+      "createdAt": "2026-10-04T17:00:00.000Z",
+      "updatedAt": "2026-10-04T17:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "freightRequestId": 2,
+      "returnRouteId": 1,
+      "carrierId": 1,
+      "merchantId": 6,
+      "initiatedBy": "merchant",
+      "currentRate": {
+        "amount": 220,
+        "currency": "PEN"
+      },
+      "previousRate": null,
+      "lastOfferBy": "merchant",
+      "status": "pending",
+      "detour": {
+        "distanceKm": 9.5,
+        "durationMinutes": 19
+      },
+      "createdAt": "2026-10-05T08:00:00.000Z",
+      "updatedAt": "2026-10-05T08:00:00.000Z"
+    }
+  ],
+  "shipments": [
+    {
+      "id": 1,
+      "code": "SH-3310",
+      "proposalId": 1,
+      "freightRequestId": 5,
+      "returnRouteId": 2,
+      "carrierId": 1,
+      "carrierName": "Juan David Ramos",
+      "carrierPhone": "987654321",
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "merchantId": 2,
+      "merchantName": "Textiles Andinos SAC",
+      "merchantPhone": "987123456",
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Benavides 1555",
+        "district": "Miraflores"
+      },
+      "pickupDate": "2026-10-05",
+      "pickupWindow": "16:00 – 17:00",
+      "cargoDescription": "20 bales of fabric.",
+      "cargoType": "textiles",
+      "weightKg": 800,
+      "rate": {
+        "amount": 180,
+        "currency": "PEN"
+      },
+      "status": "in_transit",
+      "currentLocation": {
+        "latitude": -12.0682,
+        "longitude": -76.9671
+      },
+      "events": [
+        {
+          "type": "matched",
+          "occurredAt": "2026-10-03T11:00:00.000Z",
+          "details": {}
+        },
+        {
+          "type": "picked_up",
+          "occurredAt": "2026-10-05T21:42:00.000Z",
+          "details": {
+            "district": "Ate"
+          }
+        }
+      ],
+      "incidents": [],
+      "createdAt": "2026-10-03T11:00:00.000Z",
+      "pickedUpAt": "2026-10-05T21:42:00.000Z",
+      "deliveredAt": null,
+      "closedAt": null
+    },
+    {
+      "id": 2,
+      "code": "SH-3290",
+      "proposalId": 90,
+      "freightRequestId": null,
+      "returnRouteId": null,
+      "carrierId": 1,
+      "carrierName": "Juan David Ramos",
+      "carrierPhone": "987654321",
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "merchantId": 6,
+      "merchantName": "Ferretería Norte EIRL",
+      "merchantPhone": "983777888",
+      "pickup": {
+        "street": "Av. Separadora Industrial 900",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Argentina 2800",
+        "district": "Callao"
+      },
+      "pickupDate": "2026-10-01",
+      "pickupWindow": "09:00 – 10:00",
+      "cargoDescription": "Hardware pallets.",
+      "cargoType": "hardware",
+      "weightKg": 1100,
+      "rate": {
+        "amount": 220,
+        "currency": "PEN"
+      },
+      "status": "closed",
+      "currentLocation": {
+        "latitude": -12.0566,
+        "longitude": -77.1181
+      },
+      "events": [
+        {
+          "type": "matched",
+          "occurredAt": "2026-09-30T15:00:00.000Z",
+          "details": {}
+        },
+        {
+          "type": "picked_up",
+          "occurredAt": "2026-10-01T14:10:00.000Z",
+          "details": {
+            "district": "Ate"
+          }
+        },
+        {
+          "type": "delivered",
+          "occurredAt": "2026-10-01T15:30:00.000Z",
+          "details": {
+            "distanceKm": 0.2
+          }
+        },
+        {
+          "type": "received",
+          "occurredAt": "2026-10-01T16:00:00.000Z",
+          "details": {}
+        }
+      ],
+      "incidents": [],
+      "createdAt": "2026-09-30T15:00:00.000Z",
+      "pickedUpAt": "2026-10-01T14:10:00.000Z",
+      "deliveredAt": "2026-10-01T15:30:00.000Z",
+      "closedAt": "2026-10-01T16:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "code": "SH-3285",
+      "proposalId": 91,
+      "freightRequestId": null,
+      "returnRouteId": null,
+      "carrierId": 1,
+      "carrierName": "Juan David Ramos",
+      "carrierPhone": "987654321",
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "merchantId": 5,
+      "merchantName": "Dulces Camila",
+      "merchantPhone": "984555666",
+      "pickup": {
+        "street": "Av. Revolución 1500",
+        "district": "Villa El Salvador"
+      },
+      "delivery": {
+        "street": "Av. Universitaria 7800",
+        "district": "Comas"
+      },
+      "pickupDate": "2026-09-29",
+      "pickupWindow": "10:00 – 11:00",
+      "cargoDescription": "Boxes of sweets.",
+      "cargoType": "food",
+      "weightKg": 120,
+      "rate": {
+        "amount": 90,
+        "currency": "PEN"
+      },
+      "status": "cancelled",
+      "currentLocation": null,
+      "events": [
+        {
+          "type": "matched",
+          "occurredAt": "2026-09-28T15:00:00.000Z",
+          "details": {}
+        },
+        {
+          "type": "cancelled",
+          "occurredAt": "2026-09-29T08:00:00.000Z",
+          "details": {}
+        }
+      ],
+      "incidents": [],
+      "createdAt": "2026-09-28T15:00:00.000Z",
+      "pickedUpAt": null,
+      "deliveredAt": null,
+      "closedAt": null
+    },
+    {
+      "id": 4,
+      "code": "SH-3260",
+      "proposalId": 92,
+      "freightRequestId": null,
+      "returnRouteId": null,
+      "carrierId": 1,
+      "carrierName": "Juan David Ramos",
+      "carrierPhone": "987654321",
+      "vehicleLabel": "Isuzu NPR · ABC-123",
+      "merchantId": 2,
+      "merchantName": "Textiles Andinos SAC",
+      "merchantPhone": "987123456",
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Aviación 2900",
+        "district": "San Borja"
+      },
+      "pickupDate": "2026-09-22",
+      "pickupWindow": "15:00 – 16:00",
+      "cargoDescription": "Bales of fabric.",
+      "cargoType": "textiles",
+      "weightKg": 900,
+      "rate": {
+        "amount": 170,
+        "currency": "PEN"
+      },
+      "status": "closed",
+      "currentLocation": {
+        "latitude": -12.1,
+        "longitude": -77.0
+      },
+      "events": [
+        {
+          "type": "matched",
+          "occurredAt": "2026-09-21T15:00:00.000Z",
+          "details": {}
+        },
+        {
+          "type": "picked_up",
+          "occurredAt": "2026-09-22T20:05:00.000Z",
+          "details": {
+            "district": "Ate"
+          }
+        },
+        {
+          "type": "delivered",
+          "occurredAt": "2026-09-22T21:00:00.000Z",
+          "details": {
+            "distanceKm": 0.1
+          }
+        },
+        {
+          "type": "received",
+          "occurredAt": "2026-09-22T21:20:00.000Z",
+          "details": {}
+        }
+      ],
+      "incidents": [],
+      "createdAt": "2026-09-21T15:00:00.000Z",
+      "pickedUpAt": "2026-09-22T20:05:00.000Z",
+      "deliveredAt": "2026-09-22T21:00:00.000Z",
+      "closedAt": "2026-09-22T21:20:00.000Z"
+    },
+    {
+      "id": 5,
+      "code": "SH-3241",
+      "proposalId": 93,
+      "freightRequestId": null,
+      "returnRouteId": null,
+      "carrierId": 3,
+      "carrierName": "Carlos Mendoza",
+      "carrierPhone": "986111222",
+      "vehicleLabel": "Hyundai HD65 · CMD-210",
+      "merchantId": 2,
+      "merchantName": "Textiles Andinos SAC",
+      "merchantPhone": "987123456",
+      "pickup": {
+        "street": "Av. Nicolás Ayllón 4200",
+        "district": "Ate"
+      },
+      "delivery": {
+        "street": "Av. Primavera 1200",
+        "district": "Santiago de Surco"
+      },
+      "pickupDate": "2026-09-30",
+      "pickupWindow": "10:00 – 11:00",
+      "cargoDescription": "Garments.",
+      "cargoType": "textiles",
+      "weightKg": 600,
+      "rate": {
+        "amount": 150,
+        "currency": "PEN"
+      },
+      "status": "closed",
+      "currentLocation": {
+        "latitude": -12.145,
+        "longitude": -76.99
+      },
+      "events": [
+        {
+          "type": "matched",
+          "occurredAt": "2026-09-29T15:00:00.000Z",
+          "details": {}
+        },
+        {
+          "type": "picked_up",
+          "occurredAt": "2026-09-30T15:05:00.000Z",
+          "details": {
+            "district": "Ate"
+          }
+        },
+        {
+          "type": "delivered",
+          "occurredAt": "2026-09-30T16:00:00.000Z",
+          "details": {
+            "distanceKm": 0.3
+          }
+        },
+        {
+          "type": "received",
+          "occurredAt": "2026-09-30T16:30:00.000Z",
+          "details": {}
+        }
+      ],
+      "incidents": [],
+      "createdAt": "2026-09-29T15:00:00.000Z",
+      "pickedUpAt": "2026-09-30T15:05:00.000Z",
+      "deliveredAt": "2026-09-30T16:00:00.000Z",
+      "closedAt": "2026-09-30T16:30:00.000Z"
+    }
+  ],
+  "payment-transactions": [
+    {
+      "id": 1,
+      "userId": 2,
+      "plan": "pro",
+      "amount": {
+        "amount": 39.9,
+        "currency": "PEN"
+      },
+      "method": {
+        "brand": "visa",
+        "last4": "4242",
+        "holderName": "VALERIA TORRES",
+        "expiry": "08/29"
+      },
+      "status": "paid",
+      "authorizationCode": "AUT-SEED01",
+      "createdAt": "2026-09-01T14:00:00.000Z",
+      "paidAt": "2026-09-01T14:00:01.000Z",
+      "periodStart": "2026-09-01",
+      "periodEnd": "2026-09-30"
+    }
+  ],
+  "receipts": [
+    {
+      "id": 1,
+      "transactionId": 1,
+      "userId": 2,
+      "type": "factura",
+      "series": "F001",
+      "number": 1,
+      "customerName": "Textiles Andinos SAC",
+      "customerDocument": "20601234567",
+      "total": {
+        "amount": 39.9,
+        "currency": "PEN"
+      },
+      "issuedAt": "2026-09-01T14:00:02.000Z"
+    }
+  ],
+  "ratings": [
+    {
+      "id": 1,
+      "shipmentId": 4,
+      "raterId": 2,
+      "raterName": "Textiles Andinos SAC",
+      "targetId": 1,
+      "targetRole": "carrier",
+      "targetName": "Juan David Ramos",
+      "score": 5,
+      "tags": [
+        "on_time",
+        "careful_with_goods"
+      ],
+      "comment": "Careful with the goods.",
+      "createdAt": "2026-09-22T21:30:00.000Z"
+    },
+    {
+      "id": 2,
+      "shipmentId": 4,
+      "raterId": 1,
+      "raterName": "Juan David Ramos",
+      "targetId": 2,
+      "targetRole": "merchant",
+      "targetName": "Textiles Andinos SAC",
+      "score": 5,
+      "tags": [
+        "on_time_pickup",
+        "accurate_load_info"
+      ],
+      "comment": "Load was ready on time.",
+      "createdAt": "2026-09-22T21:35:00.000Z"
+    },
+    {
+      "id": 3,
+      "shipmentId": 2,
+      "raterId": 6,
+      "raterName": "Ferretería Norte EIRL",
+      "targetId": 1,
+      "targetRole": "carrier",
+      "targetName": "Juan David Ramos",
+      "score": 4,
+      "tags": [
+        "on_time"
+      ],
+      "comment": "",
+      "createdAt": "2026-10-01T16:10:00.000Z"
+    },
+    {
+      "id": 4,
+      "shipmentId": 2,
+      "raterId": 1,
+      "raterName": "Juan David Ramos",
+      "targetId": 6,
+      "targetRole": "merchant",
+      "targetName": "Ferretería Norte EIRL",
+      "score": 5,
+      "tags": [
+        "friendly"
+      ],
+      "comment": "",
+      "createdAt": "2026-10-01T16:15:00.000Z"
+    },
+    {
+      "id": 5,
+      "shipmentId": 5,
+      "raterId": 2,
+      "raterName": "Textiles Andinos SAC",
+      "targetId": 3,
+      "targetRole": "carrier",
+      "targetName": "Carlos Mendoza",
+      "score": 4,
+      "tags": [
+        "friendly"
+      ],
+      "comment": "Good service.",
+      "createdAt": "2026-09-30T16:40:00.000Z"
+    },
+    {
+      "id": 6,
+      "shipmentId": 94,
+      "raterId": 5,
+      "raterName": "Dulces Camila",
+      "targetId": 3,
+      "targetRole": "carrier",
+      "targetName": "Carlos Mendoza",
+      "score": 5,
+      "tags": [
+        "careful_with_goods"
+      ],
+      "comment": "",
+      "createdAt": "2026-09-15T16:40:00.000Z"
+    },
+    {
+      "id": 7,
+      "shipmentId": 95,
+      "raterId": 6,
+      "raterName": "Ferretería Norte EIRL",
+      "targetId": 4,
+      "targetRole": "carrier",
+      "targetName": "Pedro Quispe",
+      "score": 5,
+      "tags": [
+        "on_time",
+        "good_communication"
+      ],
+      "comment": "",
+      "createdAt": "2026-09-18T16:40:00.000Z"
+    },
+    {
+      "id": 8,
+      "shipmentId": 96,
+      "raterId": 2,
+      "raterName": "Textiles Andinos SAC",
+      "targetId": 4,
+      "targetRole": "carrier",
+      "targetName": "Pedro Quispe",
+      "score": 5,
+      "tags": [
+        "careful_with_goods"
+      ],
+      "comment": "Excellent.",
+      "createdAt": "2026-09-10T16:40:00.000Z"
+    },
+    {
+      "id": 9,
+      "shipmentId": 97,
+      "raterId": 1,
+      "raterName": "Juan David Ramos",
+      "targetId": 5,
+      "targetRole": "merchant",
+      "targetName": "Dulces Camila",
+      "score": 5,
+      "tags": [
+        "accurate_load_info"
+      ],
+      "comment": "",
+      "createdAt": "2026-09-12T16:40:00.000Z"
+    }
+  ]
+}

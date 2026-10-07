@@ -1,0 +1,1755 @@
+@startuml
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+hide empty members
+
+package "Shared Kernel" as shared {
+    package "Domain" as shared_domain {
+        interface BaseEntity {
+            + id: number
+        }
+
+        class Money <<value object>> {
+            + {static} CURRENCIES: Record<string, string>
+            - #amount: number
+            - #currency: string
+            + {static} zero(currency: string): Money
+            + amount: number
+            + currency: string
+            + formatted: string
+            + add(other: Money): Money
+            + multiply(factor: number): Money
+            + equals(other: Money): boolean
+            + isGreaterThan(other: Money): boolean
+            - #assertSameCurrency(other: Money): void
+        }
+
+        class Address <<value object>> {
+            + {static} MIN_STREET_LENGTH: number
+            - #street: string
+            - #district: string
+            + street: string
+            + district: string
+            + location: GeoLocation
+            + fullAddress: string
+            + equals(other: Address): boolean
+        }
+
+        class GeoLocation <<value object>> {
+            + {static} EARTH_RADIUS_KM: number
+            - #latitude: number
+            - #longitude: number
+            + latitude: number
+            + longitude: number
+            + distanceTo(other: GeoLocation): number
+            + moveTowards(target: GeoLocation, fraction: number): GeoLocation
+            + distanceToSegment(start: GeoLocation, end: GeoLocation): number
+            + equals(other: GeoLocation): boolean
+        }
+
+        class LIMA_DISTRICTS <<catalog>> {
+            + DISTRICT_NAMES: string[]
+        }
+
+        class Calendar <<utility>> {
+            + todayIso(): string
+            + currentMonthIso(): string
+        }
+
+        Address --> LIMA_DISTRICTS
+        Address ..> GeoLocation
+    }
+
+    package "Application" as shared_application {
+        class NotificationStore <<store>> {
+            - notificationsSignal: WritableSignal<AppNotification[]>
+            + notifications: Signal<AppNotification[]>
+            + unreadCount: computed<number>
+            + notify(props: {severity?: NotificationSeverity; summaryKey: string; detailKey?: string; params?: Record<string, string | number>}): void
+            + markAllAsRead(): void
+            + clear(): void
+        }
+
+        interface AppNotification {
+            + id: number
+            + severity: NotificationSeverity
+            + summaryKey: string
+            + detailKey: string
+            + params: Record<string, string | number>
+            + read: boolean
+            + createdAt: string
+        }
+
+        class Collections <<utility>> {
+            + upsertById(collection: T[], entity: T): T[]
+            + replaceManyById(collection: T[], entities: T[]): T[]
+            + byNewest(selector: (item: T) => string | null | undefined): (a: T, b: T) => number
+        }
+
+        NotificationStore *-- "0..*" AppNotification
+    }
+
+    package "Infrastructure" as shared_infrastructure {
+        abstract class ErrorHandlingEnabledBaseType {
+            # handleError(operation: string): (error: HttpErrorResponse) => Observable<never>
+        }
+
+        abstract class "BaseApiEndpoint<TEntity, TResource, TResponse, TAssembler>" as BaseApiEndpoint {
+            # http: HttpClient
+            # endpointUrl: string
+            # assembler: TAssembler
+            + getAll(filters: Record<string, string | number>): Observable<TEntity[]>
+            + getById(id: number): Observable<TEntity>
+            + create(entity: TEntity): Observable<TEntity>
+            + update(entity: TEntity, id: number): Observable<TEntity>
+            + delete(id: number): Observable<void>
+        }
+
+        abstract class BaseApi
+
+        interface "BaseAssembler<TEntity, TResource, TResponse>" as BaseAssembler {
+            + toEntityFromResource(resource: TResource): TEntity
+            + toResourceFromEntity(entity: TEntity): TResource
+            + toEntitiesFromResponse(response: TResponse): TEntity[]
+        }
+
+        interface BaseResource {
+            + id: number
+        }
+
+        interface BaseResponse
+
+        class SharedAssembler <<assembler>> {
+            + {static} toAddress(resource: AddressResource): Address
+            + {static} toAddressResource(address: Address): AddressResource
+            + {static} toMoney(resource: MoneyResource): Money
+            + {static} toMoneyResource(money: Money): MoneyResource
+            + {static} toGeoLocation(resource: GeoLocationResource): GeoLocation
+            + {static} toGeoLocationResource(location: GeoLocation): GeoLocationResource
+        }
+
+        interface AddressResource {
+            + street: string
+            + district: string
+        }
+
+        interface MoneyResource {
+            + amount: number
+            + currency: string
+        }
+
+        interface GeoLocationResource {
+            + latitude: number
+            + longitude: number
+        }
+
+        class HttpClient <<angular>>
+
+        BaseApiEndpoint --|> ErrorHandlingEnabledBaseType
+        BaseApiEndpoint --> HttpClient
+        BaseApiEndpoint ..> BaseAssembler
+        BaseApiEndpoint ..> BaseResource
+        BaseApiEndpoint ..> BaseResponse
+        BaseApiEndpoint ..> BaseEntity
+        SharedAssembler ..> Address
+        SharedAssembler ..> Money
+        SharedAssembler ..> GeoLocation
+        SharedAssembler ..> AddressResource
+        SharedAssembler ..> MoneyResource
+        SharedAssembler ..> GeoLocationResource
+    }
+
+    package "Presentation" as shared_presentation {
+        class App <<component>>
+        class Layout <<component>>
+        class SideMenu <<component>>
+        class TopBar <<component>>
+        class FooterContent <<component>>
+        class LanguageSwitcher <<component>>
+        class AddressFields <<component>>
+        class StatusTag <<component>>
+        class EmptyState <<component>>
+        class ConfirmDialog <<component>>
+        class Dashboard <<view>>
+        class PageNotFound <<view>>
+
+        class BaseForm {
+            # isInvalidControl(form: FormGroup, controlName: string): boolean
+            # errorKeyForControl(form: FormGroup, controlName: string): string
+        }
+
+        class LocaleService <<service>> {
+            - translate: TranslateService
+            + language: Signal<string>
+            + languages: string[]
+            + use(language: string): void
+            + instant(key: string, params: Record<string, string | number>): string
+            + has(key: string): boolean
+        }
+
+        class FeedbackService <<service>> {
+            + {static} ERROR_DURATION_MS: number
+            + {static} SUCCESS_DURATION_MS: number
+            - snackBar: MatSnackBar
+            - locale: LocaleService
+            + describeError(error: unknown): string
+            + showError(error: unknown): void
+            + showSuccess(key: string, params: Record<string, string | number>): void
+        }
+
+        class TrazzaTitleStrategy <<service>> {
+            + {static} BRAND: string
+            - title: Title
+            - locale: LocaleService
+            - titleKeySignal: WritableSignal<string>
+            + titleKey: Signal<string>
+            + updateTitle(snapshot: RouterStateSnapshot): void
+        }
+
+        class TitleStrategy <<angular>>
+
+        class InitialsPipe <<pipe>>
+        class TrazzaDatePipe <<pipe>>
+        class TrazzaNumberPipe <<pipe>>
+        class TrazzaTimePipe <<pipe>>
+
+        App --> Layout
+        Layout --> SideMenu
+        Layout --> TopBar
+        Layout --> LanguageSwitcher
+        Layout --> FooterContent
+        TopBar --> LanguageSwitcher
+        TopBar --> NotificationStore
+        TopBar --> LocaleService
+        TopBar --> TrazzaTitleStrategy
+        LanguageSwitcher --> LocaleService
+        FeedbackService --> LocaleService
+        TrazzaTitleStrategy --|> TitleStrategy
+        TrazzaTitleStrategy --> LocaleService
+        AddressFields ..> LIMA_DISTRICTS
+    }
+}
+
+package "IAM & Profiles Bounded Context" as iam {
+    package "Domain" as iam_domain {
+        class User <<aggregate root>> {
+            + {static} MIN_NAME_LENGTH: number
+            - #id: number
+            - #fullName: string
+            - #email: Email
+            - #phone: Phone
+            - #role: UserRole
+            - #createdAt: string | null
+            + id: number
+            + fullName: string
+            + firstName: string
+            + email: Email
+            + phone: Phone
+            + role: UserRole
+            + createdAt: string | null
+            + isCarrier: boolean
+            + isMerchant: boolean
+            + updateContact(props: {fullName: string; phone: Phone}): void
+        }
+
+        class CarrierProfile <<aggregate root>> {
+            - #id: number
+            - #userId: number
+            - #fullName: string
+            - #dni: Dni
+            - #phone: Phone
+            - #verified: boolean
+            - #vehicles: Vehicle[]
+            + id: number
+            + userId: number
+            + fullName: string
+            + dni: Dni
+            + phone: Phone
+            + verified: boolean
+            + vehicles: Vehicle[]
+            + activeVehicles: Vehicle[]
+            + findVehicle(vehicleId: number): Vehicle | undefined
+            + addVehicle(vehicle: Vehicle): Vehicle
+            + updateVehicle(vehicle: Vehicle): void
+            + toggleVehicle(vehicleId: number): void
+            + removeVehicle(vehicleId: number): void
+            + updateContact(props: {fullName: string; phone: Phone}): void
+        }
+
+        class Vehicle <<entity>> {
+            + {static} BODY_TYPES: BodyType[]
+            - #id: number
+            - #plate: LicensePlate
+            - #brandModel: string
+            - #bodyType: BodyType
+            - #capacity: LoadCapacity
+            - #active: boolean
+            + id: number
+            + plate: LicensePlate
+            + brandModel: string
+            + bodyType: BodyType
+            + capacity: LoadCapacity
+            + active: boolean
+            + label: string
+            + assignId(id: number): void
+            + activate(): void
+            + deactivate(): void
+        }
+
+        class MerchantProfile <<aggregate root>> {
+            - #id: number
+            - #userId: number
+            - #businessName: string
+            - #contactName: string
+            - #ruc: Ruc
+            - #phone: Phone
+            - #verified: boolean
+            + id: number
+            + userId: number
+            + businessName: string
+            + contactName: string
+            + ruc: Ruc
+            + phone: Phone
+            + verified: boolean
+            + updateBusiness(props: {businessName: string; contactName: string; phone: Phone}): void
+        }
+
+        class Email <<value object>> {
+            + {static} PATTERN: RegExp
+            - #value: string
+            + value: string
+            + equals(other: Email): boolean
+        }
+
+        class Phone <<value object>> {
+            + {static} PATTERN: RegExp
+            - #value: string
+            + value: string
+            + formatted: string
+        }
+
+        class Dni <<value object>> {
+            + {static} PATTERN: RegExp
+            - #value: string
+            + value: string
+        }
+
+        class Ruc <<value object>> {
+            + {static} PATTERN: RegExp
+            - #value: string
+            + value: string
+            + isCompany: boolean
+        }
+
+        class LicensePlate <<value object>> {
+            + {static} PATTERN: RegExp
+            - #value: string
+            + value: string
+            + equals(other: LicensePlate): boolean
+        }
+
+        class LoadCapacity <<value object>> {
+            + {static} MAX_WEIGHT_KG: number
+            + {static} MAX_VOLUME_M3: number
+            - #weightKg: number
+            - #volumeM3: number
+            + weightKg: number
+            + volumeM3: number
+            + canHold(weightKg: number, volumeM3: number): boolean
+        }
+
+        class UserRole <<value object>> {
+            + {static} CARRIER: UserRoleValue
+            + {static} MERCHANT: UserRoleValue
+            + {static} VALUES: UserRoleValue[]
+            - #value: UserRoleValue
+            + value: UserRoleValue
+            + isCarrier: boolean
+            + isMerchant: boolean
+        }
+
+        class SignInCommand <<command>> {
+            - #email: Email
+            - #password: string
+            + email: string
+            + password: string
+        }
+
+        class SignUpCommand <<command>> {
+            + {static} MIN_PASSWORD_LENGTH: number
+            - #role: UserRole
+            - #fullName: string
+            - #businessName: string
+            - #email: Email
+            - #phone: Phone
+            - #document: Dni | Ruc
+            - #password: string
+            + role: UserRoleValue
+            + isCarrier: boolean
+            + fullName: string
+            + businessName: string
+            + email: string
+            + phone: string
+            + documentNumber: string
+            + password: string
+        }
+
+        User ..|> BaseEntity
+        CarrierProfile ..|> BaseEntity
+        MerchantProfile ..|> BaseEntity
+        Vehicle ..|> BaseEntity
+        User *-- Email
+        User *-- Phone
+        User *-- UserRole
+        CarrierProfile *-- "0..*" Vehicle
+        CarrierProfile *-- Dni
+        CarrierProfile *-- Phone
+        Vehicle *-- LicensePlate
+        Vehicle *-- LoadCapacity
+        MerchantProfile *-- Ruc
+        MerchantProfile *-- Phone
+        SignInCommand *-- Email
+        SignUpCommand *-- UserRole
+        SignUpCommand *-- Email
+        SignUpCommand *-- Phone
+        SignUpCommand ..> Dni
+        SignUpCommand ..> Ruc
+    }
+
+    package "Application" as iam_application {
+        class IamStore <<store>> {
+            - iamApi: IamApi
+            - currentUserSignal: WritableSignal<User | null>
+            - processingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + currentUser: Signal<User | null>
+            + processing: Signal<boolean>
+            + error: Signal<string | null>
+            + isSignedIn: computed<boolean>
+            + currentUserId: computed<number | null>
+            + currentRole: computed<UserRoleValue | null>
+            + isCarrier: computed<boolean>
+            + isMerchant: computed<boolean>
+            + currentToken: computed<string | null>
+            + signIn(command: SignInCommand): Observable<User>
+            + signUp(command: SignUpCommand): Observable<User>
+            + updateCurrentUser(props: {fullName: string; phone: string}): Observable<User>
+            + signOut(): void
+        }
+
+        class ProfileStore <<store>> {
+            - iamApi: IamApi
+            - iamStore: IamStore
+            - carrierProfilesSignal: WritableSignal<CarrierProfile[]>
+            - merchantProfilesSignal: WritableSignal<MerchantProfile[]>
+            - loadingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + carrierProfiles: Signal<CarrierProfile[]>
+            + merchantProfiles: Signal<MerchantProfile[]>
+            + loading: Signal<boolean>
+            + error: Signal<string | null>
+            + currentCarrierProfile: computed<CarrierProfile | null>
+            + currentMerchantProfile: computed<MerchantProfile | null>
+            + vehicles: computed<Vehicle[]>
+            + activeVehicles: computed<Vehicle[]>
+            + loadProfiles(): void
+            + carrierProfileOf(userId: number): CarrierProfile | undefined
+            + merchantProfileOf(userId: number): MerchantProfile | undefined
+            + displayNameOf(userId: number): string
+            + findVehicle(vehicleId: number): Vehicle | undefined
+            + addVehicle(data: VehicleData): Observable<CarrierProfile>
+            + updateVehicle(data: VehicleData): Observable<CarrierProfile>
+            + toggleVehicle(vehicleId: number): Observable<CarrierProfile>
+            + removeVehicle(vehicleId: number): Observable<CarrierProfile>
+            + updateCurrentProfile(data: ProfileData): Observable<unknown>
+        }
+
+        interface VehicleData {
+            + id?: number
+            + plate: string
+            + brandModel: string
+            + bodyType: string
+            + capacityKg: number
+            + volumeM3: number
+            + active?: boolean
+        }
+
+        interface ProfileData {
+            + fullName: string
+            + businessName?: string
+            + phone: string
+        }
+
+        ProfileStore ..> VehicleData
+        ProfileStore ..> ProfileData
+    }
+
+    package "Infrastructure" as iam_infrastructure {
+        class IamApi <<facade>> {
+            - http: HttpClient
+            - usersEndpoint: UsersApiEndpoint
+            - carrierProfilesEndpoint: CarrierProfilesApiEndpoint
+            - merchantProfilesEndpoint: MerchantProfilesApiEndpoint
+            + signIn(command: SignInCommand): Observable<User[]>
+            + findUsersByEmail(email: string): Observable<User[]>
+            + signUp(command: SignUpCommand): Observable<User>
+            + updateUserContact(user: User): Observable<User>
+            + getCarrierProfiles(): Observable<CarrierProfile[]>
+            + createCarrierProfile(profile: CarrierProfile): Observable<CarrierProfile>
+            + updateCarrierProfile(profile: CarrierProfile): Observable<CarrierProfile>
+            + getMerchantProfiles(): Observable<MerchantProfile[]>
+            + createMerchantProfile(profile: MerchantProfile): Observable<MerchantProfile>
+            + updateMerchantProfile(profile: MerchantProfile): Observable<MerchantProfile>
+        }
+
+        class UsersApiEndpoint <<endpoint>> {
+            + signUp(command: SignUpCommand): Observable<User>
+            + updateContact(user: User): Observable<User>
+        }
+        class CarrierProfilesApiEndpoint <<endpoint>>
+        class MerchantProfilesApiEndpoint <<endpoint>>
+
+        class UserAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: UserResource): User
+            + {static} toEntitiesFromResponse(response: UsersResponse): User[]
+            + {static} toResourceFromEntity(entity: User): UserResource
+        }
+
+        class CarrierProfileAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: CarrierProfileResource): CarrierProfile
+            + {static} toEntitiesFromResponse(response: CarrierProfilesResponse): CarrierProfile[]
+            + {static} toResourceFromEntity(entity: CarrierProfile): CarrierProfileResource
+            + {static} clone(entity: CarrierProfile): CarrierProfile
+        }
+
+        class VehicleAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: VehicleResource): Vehicle
+            + {static} toResourceFromEntity(entity: Vehicle): VehicleResource
+        }
+
+        class MerchantProfileAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: MerchantProfileResource): MerchantProfile
+            + {static} toEntitiesFromResponse(response: MerchantProfilesResponse): MerchantProfile[]
+            + {static} toResourceFromEntity(entity: MerchantProfile): MerchantProfileResource
+            + {static} clone(entity: MerchantProfile): MerchantProfile
+        }
+
+        interface UserResource
+        interface UsersResponse
+        interface CarrierProfileResource
+        interface VehicleResource
+        interface CarrierProfilesResponse
+        interface MerchantProfileResource
+        interface MerchantProfilesResponse
+
+        class iamInterceptor <<interceptor>> {
+            + HttpInterceptorFn
+        }
+
+        class iamGuard <<guard>> {
+            + CanActivateFn
+        }
+
+        class publicOnlyGuard <<guard>> {
+            + CanActivateFn
+        }
+
+        IamApi --|> BaseApi
+        IamApi --> UsersApiEndpoint
+        IamApi --> CarrierProfilesApiEndpoint
+        IamApi --> MerchantProfilesApiEndpoint
+        UsersApiEndpoint --|> BaseApiEndpoint
+        CarrierProfilesApiEndpoint --|> BaseApiEndpoint
+        MerchantProfilesApiEndpoint --|> BaseApiEndpoint
+        UsersApiEndpoint --> UserAssembler
+        CarrierProfilesApiEndpoint --> CarrierProfileAssembler
+        MerchantProfilesApiEndpoint --> MerchantProfileAssembler
+        UserAssembler ..> User
+        UserAssembler ..> UserResource
+        UserAssembler ..> UsersResponse
+        CarrierProfileAssembler ..> CarrierProfile
+        CarrierProfileAssembler ..> CarrierProfileResource
+        CarrierProfileAssembler ..> CarrierProfilesResponse
+        CarrierProfileAssembler --> VehicleAssembler
+        VehicleAssembler ..> Vehicle
+        VehicleAssembler ..> VehicleResource
+        MerchantProfileAssembler ..> MerchantProfile
+        MerchantProfileAssembler ..> MerchantProfileResource
+        MerchantProfileAssembler ..> MerchantProfilesResponse
+        CarrierProfileResource *-- "0..*" VehicleResource
+        UserResource --|> BaseResource
+        CarrierProfileResource --|> BaseResource
+        VehicleResource --|> BaseResource
+        MerchantProfileResource --|> BaseResource
+        UsersResponse --|> BaseResponse
+        CarrierProfilesResponse --|> BaseResponse
+        MerchantProfilesResponse --|> BaseResponse
+        iamInterceptor --> IamStore
+        iamGuard --> IamStore
+        publicOnlyGuard --> IamStore
+        HttpClient ..> iamInterceptor
+    }
+
+    package "Presentation" as iam_presentation {
+        class SignIn <<view>>
+        class SignUp <<view>>
+        class Profile <<view>>
+        class VehicleList <<view>>
+        class VehicleForm <<view>>
+        class VehicleCard <<component>>
+
+        SignIn --|> BaseForm
+        SignUp --|> BaseForm
+        Profile --|> BaseForm
+        VehicleForm --|> BaseForm
+        VehicleList --> VehicleCard
+        VehicleList --> EmptyState
+    }
+
+    IamStore --> IamApi
+    IamStore ..> UserAssembler
+    IamStore ..> SignInCommand
+    IamStore ..> SignUpCommand
+    ProfileStore --> IamApi
+    ProfileStore --> IamStore
+    ProfileStore ..> CarrierProfileAssembler
+    ProfileStore ..> MerchantProfileAssembler
+    SignIn --> IamStore
+    SignUp --> IamStore
+    Profile --> IamStore
+    Profile --> ProfileStore
+    VehicleList --> ProfileStore
+    VehicleForm --> ProfileStore
+}
+
+package "Matchmaking & Routing Bounded Context (Core)" as matchmaking {
+    package "Domain" as matchmaking_domain {
+        class ReturnRoute <<aggregate root>> {
+            + {static} DETOUR_OPTIONS: number[]
+            + {static} MAX_DETOUR_KM: number
+            + {static} DATE_PATTERN: RegExp
+            - #id: number
+            - #carrierId: number
+            - #vehicleId: number
+            - #vehicleLabel: string
+            - #origin: Address
+            - #destination: Address
+            - #departureDate: string
+            - #timeWindow: TimeWindow
+            - #availableWeightKg: number
+            - #availableVolumeM3: number
+            - #maxDetourKm: number
+            - #acceptedCargoTypes: CargoType[]
+            - #status: RouteStatus
+            - #distanceKm: number
+            - #durationMinutes: number
+            - #createdAt: string | null
+            + {static} create(props: Omit<ReturnRouteProps, 'status' | 'distanceKm' | 'durationMinutes' | 'createdAt'> & {today: string; vehicleCapacityKg: number; vehicleCapacityM3: number}): ReturnRoute
+            + id: number
+            + carrierId: number
+            + vehicleId: number
+            + vehicleLabel: string
+            + origin: Address
+            + destination: Address
+            + departureDate: string
+            + timeWindow: TimeWindow
+            + availableWeightKg: number
+            + availableVolumeM3: number
+            + maxDetourKm: number
+            + acceptedCargoTypes: CargoType[]
+            + status: RouteStatus
+            + distanceKm: number
+            + durationMinutes: number
+            + createdAt: string | null
+            + label: string
+            + accepts(cargoType: CargoType): boolean
+            + canCarry(weightKg: number, volumeM3: number): boolean
+            + reserveCapacity(weightKg: number, volumeM3: number): void
+            + close(): void
+        }
+
+        class FreightRequest <<aggregate root>> {
+            + {static} DATE_PATTERN: RegExp
+            - #id: number
+            - #code: string
+            - #merchantId: number
+            - #pickup: Address
+            - #delivery: Address
+            - #pickupDate: string
+            - #pickupWindow: TimeWindow
+            - #cargo: Cargo
+            - #offeredRate: Money | null
+            - #status: RequestStatus
+            - #distanceKm: number
+            - #createdAt: string | null
+            + {static} create(props: Omit<FreightRequestProps, 'status' | 'distanceKm' | 'code'> & {code?: string; today: string; publish: boolean}): FreightRequest
+            + id: number
+            + code: string
+            + merchantId: number
+            + pickup: Address
+            + delivery: Address
+            + pickupDate: string
+            + pickupWindow: TimeWindow
+            + cargo: Cargo
+            + offeredRate: Money | null
+            + status: RequestStatus
+            + distanceKm: number
+            + createdAt: string | null
+            + label: string
+            + publish(): void
+            + markMatched(): void
+            + cancel(): void
+        }
+
+        class MatchProposal <<aggregate root>> {
+            - #id: number
+            - #freightRequestId: number
+            - #returnRouteId: number
+            - #carrierId: number
+            - #merchantId: number
+            - #initiatedBy: Party
+            - #currentRate: Money
+            - #previousRate: Money | null
+            - #lastOfferBy: Party
+            - #status: ProposalStatus
+            - #detour: Detour
+            - #createdAt: string | null
+            - #updatedAt: string | null
+            + {static} create(props: {freightRequest: FreightRequest; returnRoute: ReturnRoute; rate: Money; by: Party; detour: Detour}): MatchProposal
+            + id: number
+            + freightRequestId: number
+            + returnRouteId: number
+            + carrierId: number
+            + merchantId: number
+            + initiatedBy: Party
+            + currentRate: Money
+            + previousRate: Money | null
+            + lastOfferBy: Party
+            + status: ProposalStatus
+            + detour: Detour
+            + createdAt: string | null
+            + updatedAt: string | null
+            + isAwaiting(party: string | null): boolean
+            + accept(by: string): void
+            + counter(rate: Money, by: string): void
+            + reject(by: string): void
+            + confirm(by: string): void
+            + close(): void
+            - #assertCanAnswer(by: string): void
+            - #touch(): void
+        }
+
+        class TimeWindow <<value object>> {
+            + {static} PATTERN: RegExp
+            - #start: string
+            - #end: string
+            + {static} toMinutes(time: string): number
+            + start: string
+            + end: string
+            + label: string
+            + overlaps(other: TimeWindow): boolean
+        }
+
+        class Cargo <<value object>> {
+            + {static} MAX_WEIGHT_KG: number
+            + {static} MAX_DESCRIPTION_LENGTH: number
+            - #type: CargoType
+            - #weightKg: number
+            - #volumeM3: number
+            - #description: string
+            + type: CargoType
+            + weightKg: number
+            + volumeM3: number
+            + description: string
+        }
+
+        class CargoType <<value object>> {
+            + {static} VALUES: CargoTypeValue[]
+            - #value: CargoTypeValue
+            + value: CargoTypeValue
+            + equals(other: CargoType): boolean
+        }
+
+        class Detour <<value object>> {
+            - #distanceKm: number
+            - #durationMinutes: number
+            + distanceKm: number
+            + durationMinutes: number
+            + label: string
+            + isWithin(maxDistanceKm: number): boolean
+        }
+
+        class RouteStatus <<value object>> {
+            + {static} ACTIVE: RouteStatusValue
+            + {static} MATCHED: RouteStatusValue
+            + {static} CLOSED: RouteStatusValue
+            + {static} VALUES: RouteStatusValue[]
+            - #value: RouteStatusValue
+            + value: RouteStatusValue
+            + isActive: boolean
+            + isClosed: boolean
+        }
+
+        class RequestStatus <<value object>> {
+            + {static} DRAFT: RequestStatusValue
+            + {static} OPEN: RequestStatusValue
+            + {static} MATCHED: RequestStatusValue
+            + {static} CANCELLED: RequestStatusValue
+            + {static} VALUES: RequestStatusValue[]
+            - #value: RequestStatusValue
+            + value: RequestStatusValue
+            + isOpen: boolean
+            + isDraft: boolean
+        }
+
+        class ProposalStatus <<value object>> {
+            + {static} PENDING: ProposalStatusValue
+            + {static} COUNTEROFFER: ProposalStatusValue
+            + {static} ACCEPTED: ProposalStatusValue
+            + {static} MATCHED: ProposalStatusValue
+            + {static} REJECTED: ProposalStatusValue
+            + {static} CLOSED: ProposalStatusValue
+            + {static} VALUES: ProposalStatusValue[]
+            - #value: ProposalStatusValue
+            + value: ProposalStatusValue
+            + isNegotiating: boolean
+            + isAccepted: boolean
+            + isOpen: boolean
+        }
+
+        enum Party {
+            carrier
+            merchant
+        }
+
+        class RouteMatchingService <<domain service>> {
+            + {static} ROAD_FACTOR: number
+            + {static} AVERAGE_SPEED_KMH: number
+            + {static} roadDistance(from: Address, to: Address): number
+            + {static} estimateTrip(from: Address, to: Address): TripEstimation
+            + {static} calculateDetour(route: ReturnRoute, request: FreightRequest): Detour
+            + {static} evaluate(route: ReturnRoute, request: FreightRequest, options: {maxDetourKm?: number}): MatchEvaluation
+        }
+
+        interface TripEstimation {
+            + distanceKm: number
+            + durationMinutes: number
+        }
+
+        interface MatchEvaluation {
+            + compatible: boolean
+            + reasons: string[]
+            + detour: Detour
+        }
+
+        ReturnRoute ..|> BaseEntity
+        FreightRequest ..|> BaseEntity
+        MatchProposal ..|> BaseEntity
+        ReturnRoute *-- "2" Address
+        ReturnRoute *-- TimeWindow
+        ReturnRoute *-- "1..*" CargoType
+        ReturnRoute *-- RouteStatus
+        FreightRequest *-- "2" Address
+        FreightRequest *-- TimeWindow
+        FreightRequest *-- Cargo
+        FreightRequest *-- "0..1" Money
+        FreightRequest *-- RequestStatus
+        Cargo *-- CargoType
+        MatchProposal *-- ProposalStatus
+        MatchProposal *-- Detour
+        MatchProposal *-- "1..2" Money
+        MatchProposal --> Party
+        MatchProposal ..> FreightRequest
+        MatchProposal ..> ReturnRoute
+        RouteMatchingService ..> ReturnRoute
+        RouteMatchingService ..> FreightRequest
+        RouteMatchingService ..> Detour
+        RouteMatchingService ..> TripEstimation
+        RouteMatchingService ..> MatchEvaluation
+        ReturnRoute ..> RouteMatchingService
+        FreightRequest ..> RouteMatchingService
+    }
+
+    package "Application" as matchmaking_application {
+        class MatchmakingStore <<store>> {
+            - matchmakingApi: MatchmakingApi
+            - iamStore: IamStore
+            - profileStore: ProfileStore
+            - billingStore: BillingStore
+            - executionStore: ExecutionStore
+            - notificationStore: NotificationStore
+            - returnRoutesSignal: WritableSignal<ReturnRoute[]>
+            - freightRequestsSignal: WritableSignal<FreightRequest[]>
+            - matchProposalsSignal: WritableSignal<MatchProposal[]>
+            - loadingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + returnRoutes: Signal<ReturnRoute[]>
+            + freightRequests: Signal<FreightRequest[]>
+            + matchProposals: Signal<MatchProposal[]>
+            + loading: Signal<boolean>
+            + error: Signal<string | null>
+            + myReturnRoutes: computed<ReturnRoute[]>
+            + myActiveReturnRoutes: computed<ReturnRoute[]>
+            + myFreightRequests: computed<FreightRequest[]>
+            + myProposals: computed<MatchProposal[]>
+            + proposalsAwaitingMe: computed<MatchProposal[]>
+            + publicationsThisMonth: computed<number>
+            + loadAll(): void
+            + getReturnRouteById(id: number): ReturnRoute | undefined
+            + getFreightRequestById(id: number): FreightRequest | undefined
+            + getProposalById(id: number): MatchProposal | undefined
+            + proposalsForRequest(requestId: number): MatchProposal[]
+            + proposalsForRoute(routeId: number): MatchProposal[]
+            + publishReturnRoute(data: ReturnRouteData): Observable<ReturnRoute>
+            + closeReturnRoute(routeId: number): Observable<ReturnRoute>
+            + saveFreightRequest(data: FreightRequestData, publish: boolean, existingId: number | null): Observable<FreightRequest>
+            + publishFreightRequest(requestId: number): Observable<FreightRequest>
+            + cancelFreightRequest(requestId: number): Observable<FreightRequest>
+            + getLoadSuggestions(routeId: number, filters: SuggestionFilters): LoadSuggestion[]
+            + findCarriersFor(requestId: number): CarrierSuggestion[]
+            + sendProposal(props: {routeId: number; requestId: number; amount: number}): Observable<MatchProposal>
+            + acceptProposal(proposalId: number): Observable<MatchProposal>
+            + counterProposal(proposalId: number, amount: number): Observable<MatchProposal>
+            + rejectProposal(proposalId: number): Observable<MatchProposal>
+            + confirmMatch(proposalId: number): Observable<Shipment>
+        }
+
+        interface ReturnRouteData
+        interface FreightRequestData
+
+        interface LoadSuggestion {
+            + request: FreightRequest
+            + detour: Detour
+            + proposal: MatchProposal | null
+        }
+
+        interface CarrierSuggestion {
+            + route: ReturnRoute
+            + detour: Detour
+            + proposal: MatchProposal | null
+        }
+
+        interface SuggestionFilters {
+            + cargoType?: string | null
+            + maxDetourKm?: number | null
+            + sortBy?: SuggestionSort
+        }
+
+        MatchmakingStore ..> ReturnRouteData
+        MatchmakingStore ..> FreightRequestData
+        MatchmakingStore ..> LoadSuggestion
+        MatchmakingStore ..> CarrierSuggestion
+        MatchmakingStore ..> SuggestionFilters
+    }
+
+    package "Infrastructure" as matchmaking_infrastructure {
+        class MatchmakingApi <<facade>> {
+            - http: HttpClient
+            - returnRoutesEndpoint: ReturnRoutesApiEndpoint
+            - freightRequestsEndpoint: FreightRequestsApiEndpoint
+            - matchProposalsEndpoint: MatchProposalsApiEndpoint
+            + getReturnRoutes(): Observable<ReturnRoute[]>
+            + createReturnRoute(route: ReturnRoute): Observable<ReturnRoute>
+            + updateReturnRoute(route: ReturnRoute): Observable<ReturnRoute>
+            + getFreightRequests(): Observable<FreightRequest[]>
+            + createFreightRequest(request: FreightRequest): Observable<FreightRequest>
+            + updateFreightRequest(request: FreightRequest): Observable<FreightRequest>
+            + getMatchProposals(): Observable<MatchProposal[]>
+            + createMatchProposal(proposal: MatchProposal): Observable<MatchProposal>
+            + updateMatchProposal(proposal: MatchProposal): Observable<MatchProposal>
+        }
+
+        class ReturnRoutesApiEndpoint <<endpoint>>
+        class FreightRequestsApiEndpoint <<endpoint>>
+        class MatchProposalsApiEndpoint <<endpoint>>
+
+        class ReturnRouteAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: ReturnRouteResource): ReturnRoute
+            + {static} toEntitiesFromResponse(response: ReturnRoutesResponse): ReturnRoute[]
+            + {static} toResourceFromEntity(entity: ReturnRoute): ReturnRouteResource
+            + {static} clone(entity: ReturnRoute): ReturnRoute
+        }
+
+        class FreightRequestAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: FreightRequestResource): FreightRequest
+            + {static} toEntitiesFromResponse(response: FreightRequestsResponse): FreightRequest[]
+            + {static} toResourceFromEntity(entity: FreightRequest): FreightRequestResource
+            + {static} clone(entity: FreightRequest): FreightRequest
+        }
+
+        class MatchProposalAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: MatchProposalResource): MatchProposal
+            + {static} toEntitiesFromResponse(response: MatchProposalsResponse): MatchProposal[]
+            + {static} toResourceFromEntity(entity: MatchProposal): MatchProposalResource
+            + {static} clone(entity: MatchProposal): MatchProposal
+        }
+
+        interface ReturnRouteResource
+        interface ReturnRoutesResponse
+        interface FreightRequestResource
+        interface CargoResource
+        interface FreightRequestsResponse
+        interface MatchProposalResource
+        interface MatchProposalsResponse
+
+        MatchmakingApi --|> BaseApi
+        MatchmakingApi --> ReturnRoutesApiEndpoint
+        MatchmakingApi --> FreightRequestsApiEndpoint
+        MatchmakingApi --> MatchProposalsApiEndpoint
+        ReturnRoutesApiEndpoint --|> BaseApiEndpoint
+        FreightRequestsApiEndpoint --|> BaseApiEndpoint
+        MatchProposalsApiEndpoint --|> BaseApiEndpoint
+        ReturnRoutesApiEndpoint --> ReturnRouteAssembler
+        FreightRequestsApiEndpoint --> FreightRequestAssembler
+        MatchProposalsApiEndpoint --> MatchProposalAssembler
+        ReturnRouteAssembler ..> ReturnRoute
+        ReturnRouteAssembler ..> ReturnRouteResource
+        ReturnRouteAssembler ..> ReturnRoutesResponse
+        ReturnRouteAssembler ..> SharedAssembler
+        FreightRequestAssembler ..> FreightRequest
+        FreightRequestAssembler ..> FreightRequestResource
+        FreightRequestAssembler ..> FreightRequestsResponse
+        FreightRequestAssembler ..> SharedAssembler
+        MatchProposalAssembler ..> MatchProposal
+        MatchProposalAssembler ..> MatchProposalResource
+        MatchProposalAssembler ..> MatchProposalsResponse
+        MatchProposalAssembler ..> SharedAssembler
+        FreightRequestResource *-- CargoResource
+        ReturnRouteResource --|> BaseResource
+        FreightRequestResource --|> BaseResource
+        MatchProposalResource --|> BaseResource
+        ReturnRoutesResponse --|> BaseResponse
+        FreightRequestsResponse --|> BaseResponse
+        MatchProposalsResponse --|> BaseResponse
+    }
+
+    package "Presentation" as matchmaking_presentation {
+        class ReturnRouteForm <<view>>
+        class ReturnRouteList <<view>>
+        class LoadSuggestions <<view>>
+        class LoadDetail <<view>>
+        class FreightRequestForm <<view>>
+        class FreightRequestList <<view>>
+        class FindCarriers <<view>>
+        class OfferList <<view>>
+        class OfferDetail <<view>>
+        class LoadSuggestionCard <<component>>
+        class CarrierCard <<component>>
+        class CounterOfferPanel <<component>>
+        class OfferAmountDialog <<component>>
+        class RoutePreview <<component>>
+
+        ReturnRouteForm --|> BaseForm
+        FreightRequestForm --|> BaseForm
+        ReturnRouteForm --> AddressFields
+        ReturnRouteForm --> RoutePreview
+        FreightRequestForm --> AddressFields
+        LoadSuggestions --> LoadSuggestionCard
+        LoadDetail --> CounterOfferPanel
+        OfferDetail --> CounterOfferPanel
+        FindCarriers --> CarrierCard
+        FreightRequestForm ..> RouteMatchingService
+        LoadDetail ..> RouteMatchingService
+    }
+
+    MatchmakingStore --> MatchmakingApi
+    MatchmakingStore ..> ReturnRouteAssembler
+    MatchmakingStore ..> FreightRequestAssembler
+    MatchmakingStore ..> MatchProposalAssembler
+    MatchmakingStore ..> RouteMatchingService
+    ReturnRouteForm --> MatchmakingStore
+    ReturnRouteList --> MatchmakingStore
+    LoadSuggestions --> MatchmakingStore
+    LoadDetail --> MatchmakingStore
+    FreightRequestForm --> MatchmakingStore
+    FreightRequestList --> MatchmakingStore
+    FindCarriers --> MatchmakingStore
+    OfferList --> MatchmakingStore
+    OfferDetail --> MatchmakingStore
+}
+
+package "Shipment Execution & Tracking Bounded Context" as execution {
+    package "Domain" as execution_domain {
+        class Shipment <<aggregate root>> {
+            + {static} DEVIATION_THRESHOLD_KM: number
+            + {static} DELIVERY_RADIUS_KM: number
+            + {static} INCIDENT_WINDOW_HOURS: number
+            + {static} AVERAGE_SPEED_KMH: number
+            + {static} ROAD_FACTOR: number
+            - #id: number
+            - #code: string
+            - #proposalId: number
+            - #freightRequestId: number
+            - #returnRouteId: number
+            - #carrierId: number
+            - #carrierName: string
+            - #carrierPhone: string
+            - #vehicleLabel: string
+            - #merchantId: number
+            - #merchantName: string
+            - #merchantPhone: string
+            - #pickup: Address
+            - #delivery: Address
+            - #pickupDate: string
+            - #pickupWindow: string
+            - #cargoDescription: string
+            - #cargoType: string
+            - #weightKg: number
+            - #rate: Money
+            - #status: ShipmentStatus
+            - #currentLocation: GeoLocation | null
+            - #events: ShipmentEvent[]
+            - #incidents: Incident[]
+            - #createdAt: string | null
+            - #pickedUpAt: string | null
+            - #deliveredAt: string | null
+            - #closedAt: string | null
+            + {static} open(props: OpenShipmentProps): Shipment
+            + id: number
+            + code: string
+            + proposalId: number
+            + freightRequestId: number
+            + returnRouteId: number
+            + carrierId: number
+            + carrierName: string
+            + carrierPhone: string
+            + vehicleLabel: string
+            + merchantId: number
+            + merchantName: string
+            + merchantPhone: string
+            + pickup: Address
+            + delivery: Address
+            + pickupDate: string
+            + pickupWindow: string
+            + cargoDescription: string
+            + cargoType: string
+            + weightKg: number
+            + rate: Money
+            + status: ShipmentStatus
+            + currentLocation: GeoLocation | null
+            + events: ShipmentEvent[]
+            + incidents: Incident[]
+            + createdAt: string | null
+            + pickedUpAt: string | null
+            + deliveredAt: string | null
+            + closedAt: string | null
+            + label: string
+            + deviationKm: number | null
+            + isOffRoute: boolean
+            + distanceToDeliveryKm: number | null
+            + etaMinutes: number | null
+            + involves(userId: number | null): boolean
+            + confirmPickup(): void
+            + updateLocation(location: GeoLocation): LocationUpdateResult
+            + confirmDelivery(acknowledgeDistance: boolean): void
+            + confirmReception(): void
+            + cancel(): void
+            + reportIncident(incident: Incident): Incident
+            - #addEvent(type: ShipmentEventType, details: Record<string, string | number | null>): void
+        }
+
+        class Incident <<entity>> {
+            + {static} MIN_DESCRIPTION_LENGTH: number
+            + {static} MAX_DESCRIPTION_LENGTH: number
+            - #id: number
+            - #type: IncidentType
+            - #description: string
+            - #reporterId: number
+            - #reporterRole: ReporterRole
+            - #reportedAt: string
+            - #status: IncidentStatus
+            + id: number
+            + type: IncidentType
+            + description: string
+            + reporterId: number
+            + reporterRole: ReporterRole
+            + reportedAt: string
+            + status: IncidentStatus
+            + assignId(id: number): void
+            + resolve(): void
+        }
+
+        class ShipmentEvent <<value object>> {
+            + {static} TYPES: ShipmentEventType[]
+            - #type: ShipmentEventType
+            - #occurredAt: string
+            - #details: ShipmentEventDetails
+            + type: ShipmentEventType
+            + occurredAt: string
+            + details: ShipmentEventDetails
+        }
+
+        class ShipmentStatus <<value object>> {
+            + {static} MATCHED: ShipmentStatusValue
+            + {static} PICKED_UP: ShipmentStatusValue
+            + {static} IN_TRANSIT: ShipmentStatusValue
+            + {static} DELIVERED: ShipmentStatusValue
+            + {static} CLOSED: ShipmentStatusValue
+            + {static} CANCELLED: ShipmentStatusValue
+            + {static} VALUES: ShipmentStatusValue[]
+            + {static} STEPS: Record<ShipmentStatusValue, number>
+            - #value: ShipmentStatusValue
+            + value: ShipmentStatusValue
+            + isActive: boolean
+            + isMoving: boolean
+            + isDelivered: boolean
+            + step: number
+        }
+
+        class IncidentType <<value object>> {
+            + {static} VALUES: IncidentTypeValue[]
+            - #value: IncidentTypeValue
+            + value: IncidentTypeValue
+        }
+
+        Shipment ..|> BaseEntity
+        Incident ..|> BaseEntity
+        Shipment *-- "0..*" Incident
+        Shipment *-- "0..*" ShipmentEvent
+        Shipment *-- ShipmentStatus
+        Shipment *-- "2" Address
+        Shipment *-- Money
+        Shipment *-- "0..1" GeoLocation
+        Incident *-- IncidentType
+    }
+
+    package "Application" as execution_application {
+        class ExecutionStore <<store>> {
+            + {static} SIMULATION_STEP_KM: number
+            + {static} ARRIVAL_THRESHOLD_KM: number
+            + {static} DEVIATION_PROBABILITY: number
+            + {static} DEVIATION_OFFSET: number
+            + {static} JITTER: number
+            - executionApi: ExecutionApi
+            - iamStore: IamStore
+            - notificationStore: NotificationStore
+            - shipmentsSignal: WritableSignal<Shipment[]>
+            - loadingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + shipments: Signal<Shipment[]>
+            + loading: Signal<boolean>
+            + error: Signal<string | null>
+            + myShipments: computed<Shipment[]>
+            + myActiveShipments: computed<Shipment[]>
+            + myFinishedShipments: computed<Shipment[]>
+            + loadShipments(): void
+            + getShipmentById(id: number): Shipment | undefined
+            + openShipment(props: OpenShipmentProps): Observable<Shipment>
+            + confirmPickup(shipmentId: number): Observable<Shipment>
+            + shareLocation(shipmentId: number, location: GeoLocation | null): Observable<LocationUpdateResult>
+            + confirmDelivery(shipmentId: number, acknowledgeDistance: boolean): Observable<Shipment>
+            + confirmReception(shipmentId: number): Observable<Shipment>
+            + cancelShipment(shipmentId: number): Observable<Shipment>
+            + reportIncident(shipmentId: number, props: {type: string; description: string}): Observable<Shipment>
+        }
+    }
+
+    package "Infrastructure" as execution_infrastructure {
+        class ExecutionApi <<facade>> {
+            - http: HttpClient
+            - shipmentsEndpoint: ShipmentsApiEndpoint
+            + getShipments(): Observable<Shipment[]>
+            + getShipment(id: number): Observable<Shipment>
+            + createShipment(shipment: Shipment): Observable<Shipment>
+            + updateShipment(shipment: Shipment): Observable<Shipment>
+        }
+
+        class ShipmentsApiEndpoint <<endpoint>>
+
+        class ShipmentAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: ShipmentResource): Shipment
+            + {static} toEntitiesFromResponse(response: ShipmentsResponse): Shipment[]
+            + {static} toResourceFromEntity(entity: Shipment): ShipmentResource
+            + {static} clone(entity: Shipment): Shipment
+        }
+
+        class IncidentAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: IncidentResource): Incident
+            + {static} toResourceFromEntity(entity: Incident): IncidentResource
+        }
+
+        class MapProvider <<service>> {
+            + {static} MARGIN_DEGREES: number
+            + embedUrl(points: GeoLocation[], marker: GeoLocation | null): string
+            + viewUrl(location: GeoLocation): string
+        }
+
+        interface ShipmentResource
+        interface ShipmentEventResource
+        interface IncidentResource
+        interface ShipmentsResponse
+
+        ExecutionApi --|> BaseApi
+        ExecutionApi --> ShipmentsApiEndpoint
+        ShipmentsApiEndpoint --|> BaseApiEndpoint
+        ShipmentsApiEndpoint --> ShipmentAssembler
+        ShipmentAssembler ..> Shipment
+        ShipmentAssembler ..> ShipmentResource
+        ShipmentAssembler ..> ShipmentsResponse
+        ShipmentAssembler --> IncidentAssembler
+        ShipmentAssembler ..> SharedAssembler
+        IncidentAssembler ..> Incident
+        IncidentAssembler ..> IncidentResource
+        ShipmentResource *-- "0..*" ShipmentEventResource
+        ShipmentResource *-- "0..*" IncidentResource
+        ShipmentResource --|> BaseResource
+        ShipmentsResponse --|> BaseResponse
+        MapProvider ..> GeoLocation
+    }
+
+    package "Presentation" as execution_presentation {
+        class ActiveTrip <<view>>
+        class ShipmentTracking <<view>>
+        class ShipmentHistory <<view>>
+        class TripHistory <<view>>
+        class ShipmentHistoryTable <<component>>
+        class ShipmentTimeline <<component>>
+        class TrackingMap <<component>>
+        class IncidentDialog <<component>>
+
+        ActiveTrip --> ShipmentTimeline
+        ActiveTrip --> TrackingMap
+        ShipmentTracking --> ShipmentTimeline
+        ShipmentTracking --> TrackingMap
+        ShipmentHistory --> ShipmentHistoryTable
+        TripHistory --> ShipmentHistoryTable
+        TrackingMap --> MapProvider
+        ActiveTrip ..> IncidentDialog
+        ShipmentTracking ..> IncidentDialog
+    }
+
+    ExecutionStore --> ExecutionApi
+    ExecutionStore ..> ShipmentAssembler
+    ActiveTrip --> ExecutionStore
+    ShipmentTracking --> ExecutionStore
+    ShipmentHistoryTable --> ExecutionStore
+    IncidentDialog --> ExecutionStore
+}
+
+package "Billing & Subscriptions Bounded Context" as billing {
+    package "Domain" as billing_domain {
+        class PaymentTransaction <<aggregate root>> {
+            - #id: number
+            - #userId: number
+            - #plan: SubscriptionPlan
+            - #amount: Money
+            - #method: PaymentMethod
+            - #status: PaymentStatus
+            - #authorizationCode: string | null
+            - #createdAt: string | null
+            - #paidAt: string | null
+            - #periodStart: string | null
+            - #periodEnd: string | null
+            + {static} create(props: {userId: number; plan: SubscriptionPlan; method: PaymentMethod}): PaymentTransaction
+            + id: number
+            + userId: number
+            + plan: SubscriptionPlan
+            + amount: Money
+            + method: PaymentMethod
+            + status: PaymentStatus
+            + authorizationCode: string | null
+            + createdAt: string | null
+            + paidAt: string | null
+            + periodStart: string | null
+            + periodEnd: string | null
+            + markPaid(authorizationCode: string, now: Date): void
+            + markFailed(): void
+            + covers(today: string): boolean
+        }
+
+        class Receipt <<aggregate root>> {
+            + {static} IGV_RATE: number
+            - #id: number
+            - #transactionId: number
+            - #userId: number
+            - #type: ReceiptType
+            - #number: number
+            - #customerName: string
+            - #customerDocument: string
+            - #total: Money
+            - #issuedAt: string
+            + {static} issue(props: {transaction: PaymentTransaction; type: ReceiptType; number: number; customerName: string; customerDocument: string}): Receipt
+            + id: number
+            + transactionId: number
+            + userId: number
+            + type: ReceiptType
+            + number: number
+            + customerName: string
+            + customerDocument: string
+            + total: Money
+            + issuedAt: string
+            + code: string
+            + subtotal: Money
+            + igv: Money
+        }
+
+        class SubscriptionPlan <<value object>> {
+            + {static} FREE: SubscriptionPlanCode
+            + {static} PRO: SubscriptionPlanCode
+            + {static} CATALOG: Record<SubscriptionPlanCode, {price: number; monthlyPublications: number | null}>
+            - #code: SubscriptionPlanCode
+            + code: SubscriptionPlanCode
+            + price: Money
+            + monthlyPublications: number | null
+            + isFree: boolean
+            + allowsPublication(usedThisMonth: number): boolean
+        }
+
+        class PaymentMethod <<value object>> {
+            + {static} BRANDS: CardBrand[]
+            + {static} EXPIRY_PATTERN: RegExp
+            - #brand: CardBrand
+            - #last4: string
+            - #holderName: string
+            - #expiry: string
+            + {static} fromCard(props: {number: string; holderName: string; expiry: string; today?: Date}): PaymentMethod
+            + {static} passesLuhn(digits: string): boolean
+            + {static} detectBrand(digits: string): CardBrand
+            + brand: CardBrand
+            + last4: string
+            + holderName: string
+            + expiry: string
+            + label: string
+        }
+
+        class PaymentStatus <<value object>> {
+            + {static} PENDING: PaymentStatusValue
+            + {static} PAID: PaymentStatusValue
+            + {static} FAILED: PaymentStatusValue
+            + {static} VALUES: PaymentStatusValue[]
+            - #value: PaymentStatusValue
+            + value: PaymentStatusValue
+            + isPaid: boolean
+            + isPending: boolean
+        }
+
+        class ReceiptType <<value object>> {
+            + {static} BOLETA: ReceiptTypeValue
+            + {static} FACTURA: ReceiptTypeValue
+            + {static} RULES: Record<ReceiptTypeValue, {series: string; documentPattern: RegExp}>
+            - #value: ReceiptTypeValue
+            + value: ReceiptTypeValue
+            + series: string
+            + documentError: string
+            + acceptsDocument(documentNumber: string): boolean
+        }
+
+        PaymentTransaction ..|> BaseEntity
+        Receipt ..|> BaseEntity
+        PaymentTransaction *-- SubscriptionPlan
+        PaymentTransaction *-- Money
+        PaymentTransaction *-- PaymentMethod
+        PaymentTransaction *-- PaymentStatus
+        Receipt *-- ReceiptType
+        Receipt *-- Money
+        Receipt ..> PaymentTransaction
+        SubscriptionPlan ..> Money
+    }
+
+    package "Application" as billing_application {
+        class BillingStore <<store>> {
+            - billingApi: BillingApi
+            - paymentGateway: PaymentGateway
+            - iamStore: IamStore
+            - transactionsSignal: WritableSignal<PaymentTransaction[]>
+            - receiptsSignal: WritableSignal<Receipt[]>
+            - loadingSignal: WritableSignal<boolean>
+            - processingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + transactions: Signal<PaymentTransaction[]>
+            + receipts: Signal<Receipt[]>
+            + loading: Signal<boolean>
+            + processing: Signal<boolean>
+            + error: Signal<string | null>
+            + myTransactions: computed<PaymentTransaction[]>
+            + myReceipts: computed<Receipt[]>
+            + activeSubscription: computed<PaymentTransaction | null>
+            + currentPlan: computed<SubscriptionPlan>
+            + lastPaymentMethod: computed<PaymentMethod | null>
+            + loadBilling(): void
+            + canPublish(usedThisMonth: number): boolean
+            + receiptForTransaction(transactionId: number): Receipt | undefined
+            + upgradeToPro(data: UpgradeData): Observable<UpgradeResult>
+        }
+
+        interface UpgradeData {
+            + cardNumber: string
+            + holderName: string
+            + expiry: string
+            + receiptType: string
+            + customerName: string
+            + customerDocument: string
+        }
+
+        interface UpgradeResult {
+            + transaction: PaymentTransaction
+            + receipt: Receipt
+        }
+
+        BillingStore ..> UpgradeData
+        BillingStore ..> UpgradeResult
+    }
+
+    package "Infrastructure" as billing_infrastructure {
+        class BillingApi <<facade>> {
+            - http: HttpClient
+            - paymentTransactionsEndpoint: PaymentTransactionsApiEndpoint
+            - receiptsEndpoint: ReceiptsApiEndpoint
+            + getPaymentTransactions(): Observable<PaymentTransaction[]>
+            + createPaymentTransaction(transaction: PaymentTransaction): Observable<PaymentTransaction>
+            + getReceipts(): Observable<Receipt[]>
+            + createReceipt(receipt: Receipt): Observable<Receipt>
+        }
+
+        class PaymentTransactionsApiEndpoint <<endpoint>>
+        class ReceiptsApiEndpoint <<endpoint>>
+
+        class PaymentTransactionAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: PaymentTransactionResource): PaymentTransaction
+            + {static} toEntitiesFromResponse(response: PaymentTransactionsResponse): PaymentTransaction[]
+            + {static} toResourceFromEntity(entity: PaymentTransaction): PaymentTransactionResource
+        }
+
+        class ReceiptAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: ReceiptResource): Receipt
+            + {static} toEntitiesFromResponse(response: ReceiptsResponse): Receipt[]
+            + {static} toResourceFromEntity(entity: Receipt): ReceiptResource
+        }
+
+        class PaymentGateway <<gateway>> {
+            + {static} DECLINED_TEST_CARD: string
+            + {static} LATENCY_MS: number
+            + charge(amount: Money, method: PaymentMethod): Observable<ChargeResult>
+        }
+
+        interface ChargeResult {
+            + approved: boolean
+            + authorizationCode: string | null
+        }
+
+        interface PaymentTransactionResource
+        interface PaymentMethodResource
+        interface PaymentTransactionsResponse
+        interface ReceiptResource
+        interface ReceiptsResponse
+
+        BillingApi --|> BaseApi
+        BillingApi --> PaymentTransactionsApiEndpoint
+        BillingApi --> ReceiptsApiEndpoint
+        PaymentTransactionsApiEndpoint --|> BaseApiEndpoint
+        ReceiptsApiEndpoint --|> BaseApiEndpoint
+        PaymentTransactionsApiEndpoint --> PaymentTransactionAssembler
+        ReceiptsApiEndpoint --> ReceiptAssembler
+        PaymentTransactionAssembler ..> PaymentTransaction
+        PaymentTransactionAssembler ..> PaymentTransactionResource
+        PaymentTransactionAssembler ..> PaymentTransactionsResponse
+        PaymentTransactionAssembler ..> SharedAssembler
+        ReceiptAssembler ..> Receipt
+        ReceiptAssembler ..> ReceiptResource
+        ReceiptAssembler ..> ReceiptsResponse
+        ReceiptAssembler ..> SharedAssembler
+        PaymentTransactionResource *-- PaymentMethodResource
+        PaymentTransactionResource --|> BaseResource
+        ReceiptResource --|> BaseResource
+        PaymentTransactionsResponse --|> BaseResponse
+        ReceiptsResponse --|> BaseResponse
+        PaymentGateway ..> ChargeResult
+        PaymentGateway ..> PaymentMethod
+    }
+
+    package "Presentation" as billing_presentation {
+        class PlanBilling <<view>>
+        class CheckoutDialog <<component>>
+        class ReceiptDialog <<component>>
+
+        PlanBilling ..> CheckoutDialog
+        PlanBilling ..> ReceiptDialog
+    }
+
+    BillingStore --> BillingApi
+    BillingStore --> PaymentGateway
+    PlanBilling --> BillingStore
+    CheckoutDialog --> BillingStore
+}
+
+package "Loyalty & Reputation Bounded Context" as reputation {
+    package "Domain" as reputation_domain {
+        class Rating <<aggregate root>> {
+            + {static} MAX_COMMENT_LENGTH: number
+            - #id: number
+            - #shipmentId: number
+            - #raterId: number
+            - #raterName: string
+            - #target: RatingTarget
+            - #score: Score
+            - #tags: string[]
+            - #comment: string
+            - #createdAt: string
+            + id: number
+            + shipmentId: number
+            + raterId: number
+            + raterName: string
+            + target: RatingTarget
+            + score: Score
+            + tags: string[]
+            + comment: string
+            + createdAt: string
+        }
+
+        class Score <<value object>> {
+            + {static} MIN: number
+            + {static} MAX: number
+            - #value: number
+            + value: number
+            + isPositive: boolean
+        }
+
+        class RatingTarget <<value object>> {
+            + {static} TAGS: Record<RatingTargetRole, string[]>
+            - #userId: number
+            - #role: RatingTargetRole
+            - #name: string
+            + userId: number
+            + role: RatingTargetRole
+            + name: string
+            + allowedTags: string[]
+        }
+
+        Rating ..|> BaseEntity
+        Rating *-- Score
+        Rating *-- RatingTarget
+    }
+
+    package "Application" as reputation_application {
+        class ReputationStore <<store>> {
+            - reputationApi: ReputationApi
+            - iamStore: IamStore
+            - ratingsSignal: WritableSignal<Rating[]>
+            - loadingSignal: WritableSignal<boolean>
+            - errorSignal: WritableSignal<string | null>
+            + ratings: Signal<Rating[]>
+            + loading: Signal<boolean>
+            + error: Signal<string | null>
+            + myReceivedRatings: computed<Rating[]>
+            + myGivenRatings: computed<Rating[]>
+            + mySummary: computed<ReputationSummary>
+            + loadRatings(): void
+            + ratingsReceivedBy(userId: number | null): Rating[]
+            + summaryFor(userId: number | null): ReputationSummary
+            + ratingForShipmentBy(shipmentId: number, raterId: number | null): Rating | undefined
+            + submitRating(props: {shipment: Shipment; score: number; tags: string[]; comment: string}): Observable<Rating>
+        }
+
+        interface ReputationSummary {
+            + average: number
+            + count: number
+            + distribution: number[]
+        }
+
+        ReputationStore ..> ReputationSummary
+    }
+
+    package "Infrastructure" as reputation_infrastructure {
+        class ReputationApi <<facade>> {
+            - http: HttpClient
+            - ratingsEndpoint: RatingsApiEndpoint
+            + getRatings(): Observable<Rating[]>
+            + createRating(rating: Rating): Observable<Rating>
+        }
+
+        class RatingsApiEndpoint <<endpoint>>
+
+        class RatingAssembler <<assembler>> {
+            + {static} toEntityFromResource(resource: RatingResource): Rating
+            + {static} toEntitiesFromResponse(response: RatingsResponse): Rating[]
+            + {static} toResourceFromEntity(entity: Rating): RatingResource
+        }
+
+        interface RatingResource
+        interface RatingsResponse
+
+        ReputationApi --|> BaseApi
+        ReputationApi --> RatingsApiEndpoint
+        RatingsApiEndpoint --|> BaseApiEndpoint
+        RatingsApiEndpoint --> RatingAssembler
+        RatingAssembler ..> Rating
+        RatingAssembler ..> RatingResource
+        RatingAssembler ..> RatingsResponse
+        RatingResource --|> BaseResource
+        RatingsResponse --|> BaseResponse
+    }
+
+    package "Presentation" as reputation_presentation {
+        class RatingList <<view>>
+        class RatingDialog <<component>>
+        class StarRating <<component>>
+
+        RatingList --> StarRating
+        RatingDialog --> StarRating
+    }
+
+    ReputationStore --> ReputationApi
+    RatingList --> ReputationStore
+    RatingDialog --> ReputationStore
+}
+
+MatchmakingStore --> ExecutionStore : confirmMatch opens shipment
+MatchmakingStore --> BillingStore : publication limit
+MatchmakingStore --> ProfileStore : vehicles and names
+MatchmakingStore --> IamStore : current user
+MatchmakingStore --> NotificationStore : proposal events
+ExecutionStore --> IamStore : current user
+ExecutionStore --> NotificationStore : tracking alerts
+BillingStore --> IamStore : current user
+ReputationStore --> IamStore : current user
+ReputationStore ..> Shipment : delivered shipment
+MatchmakingStore ..> Shipment
+MatchProposal ..> Money
+
+Layout --> IamStore
+Layout --> ProfileStore
+Layout --> MatchmakingStore
+Layout --> ExecutionStore
+Layout --> BillingStore
+Layout --> ReputationStore
+SideMenu --> IamStore
+Dashboard --> IamStore
+Dashboard --> ProfileStore
+Dashboard --> MatchmakingStore
+Dashboard --> ExecutionStore
+Dashboard --> ReputationStore
+
+Profile --> ReputationStore
+FreightRequestForm --> BillingStore
+ReturnRouteForm --> ProfileStore
+ReturnRouteForm --> BillingStore
+LoadSuggestions --> ProfileStore
+LoadSuggestions --> ReputationStore
+LoadDetail --> ProfileStore
+LoadDetail --> ReputationStore
+FindCarriers --> ProfileStore
+FindCarriers --> ReputationStore
+OfferList --> IamStore
+OfferList --> ProfileStore
+OfferDetail --> ProfileStore
+OfferDetail --> ReputationStore
+ActiveTrip --> ReputationStore
+ActiveTrip --> IamStore
+ShipmentTracking --> ReputationStore
+ShipmentTracking --> IamStore
+ShipmentHistoryTable --> ReputationStore
+ShipmentHistoryTable --> IamStore
+PlanBilling --> MatchmakingStore
+PlanBilling --> IamStore
+PlanBilling --> ProfileStore
+RatingDialog --> IamStore
+ActiveTrip ..> RatingDialog
+ShipmentTracking ..> RatingDialog
+ShipmentHistoryTable ..> RatingDialog
+FindCarriers ..> OfferAmountDialog
+OfferList ..> OfferAmountDialog
+ActiveTrip ..> ConfirmDialog
+VehicleList ..> ConfirmDialog
+FreightRequestList ..> ConfirmDialog
+ReturnRouteList ..> ConfirmDialog
+@enduml

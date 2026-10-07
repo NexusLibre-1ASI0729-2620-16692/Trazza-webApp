@@ -1,0 +1,17 @@
+<fieldset class="address-fieldset" [formGroup]="group()">
+  <legend class="address-legend">{{ labelKey() | translate }} *</legend>
+  <div class="address-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'fields.street-placeholder' | translate }}</mat-label>
+      <input matInput [id]="fieldId() + '-street'" formControlName="street" autocomplete="street-address">
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'fields.district' | translate }}</mat-label>
+      <mat-select [id]="fieldId() + '-district'" formControlName="district">
+        @for (district of districts; track district) {
+          <mat-option [value]="district">{{ district }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+</fieldset>

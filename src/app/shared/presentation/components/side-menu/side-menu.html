@@ -1,0 +1,21 @@
+<nav class="side-menu" [attr.aria-label]="'menu.main' | translate">
+  <a routerLink="/dashboard" class="brand-link" (click)="navigate.emit()">
+    <img src="/trazza-logo.svg" alt="" width="32" height="32">
+    <span class="brand">Trazza</span>
+  </a>
+  <div class="trazza-overline account-label">{{ accountLabel() | translate }}</div>
+  <ul class="menu-list">
+    @for (option of options(); track option.link) {
+      <li>
+        <a class="menu-link" [routerLink]="option.link" routerLinkActive="menu-link-active" ariaCurrentWhenActive="page" (click)="navigate.emit()">
+          <mat-icon aria-hidden="true">{{ option.icon }}</mat-icon>
+          <span>{{ option.label | translate }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+  <button type="button" class="menu-link sign-out" (click)="signOut()">
+    <mat-icon aria-hidden="true">logout</mat-icon>
+    <span>{{ 'menu.sign-out' | translate }}</span>
+  </button>
+</nav>
