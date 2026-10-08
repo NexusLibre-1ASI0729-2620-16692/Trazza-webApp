@@ -17,6 +17,7 @@ import {GeoLocation} from '../../shared/domain/model/geo-location.value-object';
 
 import {ExecutionApi} from '../infrastructure/execution-api';
 import {NotificationStore} from '../../shared/application/notification.store';
+import {IamStore} from '../../iam/application/iam.store';
 
 @Injectable({
   providedIn: 'root'
@@ -33,14 +34,37 @@ export class ExecutionStore {
   readonly error = this.errorSignal.asReadonly();
   readonly loaded = this.loadedSignal.asReadonly();
 
-  readonly myShipments = computed(() => this.shipments());
+  readonly myShipments = computed(() => {
+    const userId = this.iamStore.currentUserId();
+
+    if (userId === null) {
+      return [];
+    }
+
+    if (this.iamStore.isCarrier()) {
+      return this.shipments().filter(
+        shipment => shipment.carrierId === userId
+      );
+    }
+
+    if (this.iamStore.isMerchant()) {
+      return this.shipments().filter(
+        shipment => shipment.merchantId === userId
+      );
+    }
+
+    return [];
+  });
 
   readonly myActiveShipments = computed(() =>
-    this.activeShipments()
+    this.myShipments().filter(shipment => shipment.status.isActive)
   );
 
   readonly myFinishedShipments = computed(() =>
-    this.finishedShipments()
+    this.myShipments().filter(shipment =>
+      shipment.status.isDelivered ||
+      shipment.status.isCancelled
+    )
   );
 
   /**
@@ -62,7 +86,8 @@ export class ExecutionStore {
 
   constructor(
     private readonly executionApi: ExecutionApi,
-    private readonly notificationStore: NotificationStore
+    private readonly notificationStore: NotificationStore,
+    private readonly iamStore: IamStore
   ) {}
 
   /**
@@ -97,6 +122,7 @@ export class ExecutionStore {
             'No se pudieron cargar los envíos.'
           );
 
+          this.loadedSignal.set(false);
           this.loadingSignal.set(false);
         }
       })
@@ -146,14 +172,14 @@ export class ExecutionStore {
   /**
    * Confirma que el carrier recogió la carga.
    */
-  confirmPickup(shipment: Shipment): Observable<Shipment> {
-    shipment.confirmPickup();
+  async confirmPickup(shipment: Shipment): Promise<void> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      return;
+    }
 
-    return this.persistShipment(
-      shipment,
-      'shipment.notification.pickup.summary',
-      'shipment.notification.pickup.detail'
-    );
+    shipment.confirmPickup();
+    await this.persistShipment(shipment);
   }
 
   /**
@@ -163,6 +189,11 @@ export class ExecutionStore {
     shipment: Shipment,
     location?: GeoLocation
   ): Observable<Shipment> {
+
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      throw new Error('execution.shipment-not-active');
+    }
 
     const newLocation = location ?? shipment.currentLocation;
 
@@ -197,24 +228,28 @@ export class ExecutionStore {
   /**
    * Confirma la entrega.
    */
-  confirmDelivery(
+  async confirmDelivery(
     shipment: Shipment,
     acknowledgeDistance = false
-  ): Observable<Shipment> {
+  ): Promise<void> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      return;
+    }
 
     shipment.confirmDelivery(acknowledgeDistance);
-
-    return this.persistShipment(
-      shipment,
-      'shipment.notification.delivery.summary',
-      'shipment.notification.delivery.detail'
-    );
+    await this.persistShipment(shipment);
   }
 
   /**
    * Confirma que el merchant recibió la carga.
    */
   confirmReception(shipment: Shipment): Observable<Shipment> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      throw new Error('execution.shipment-not-active');
+    }
+
     shipment.confirmReception();
 
     return this.persistShipment(
@@ -302,19 +337,17 @@ export class ExecutionStore {
    */
   private upsertShipment(shipment: Shipment): void {
     this.shipmentsSignal.update(shipments => {
-
-      const index = shipments.findIndex(
+      const exists = shipments.some(
         current => current.id === shipment.id
       );
 
-      if (index === -1) {
+      if (!exists) {
         return [...shipments, shipment];
       }
 
-      const updated = [...shipments];
-      updated[index] = shipment;
-
-      return updated;
+      return shipments.map(current =>
+        current.id === shipment.id ? shipment : current
+      );
     });
   }
 }
