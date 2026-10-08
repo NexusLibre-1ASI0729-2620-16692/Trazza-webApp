@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  platformProviderApiBaseUrl: 'http://16.59.43.35/api/v1',
+  platformProviderApiBaseUrl: 'http://16.59.43.35:3000/api/v1',
   platformProviderUsersEndpointPath: '/users',
   platformProviderCarrierProfilesEndpointPath: '/carrier-profiles',
   platformProviderMerchantProfilesEndpointPath: '/merchant-profiles',
