@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { SESSION_TOKEN_KEY } from './iam.interceptor';
 
-export const authenticationGuard: CanActivateFn = (route, state) => {
+export const iamGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
   const token = localStorage.getItem(SESSION_TOKEN_KEY);
 
