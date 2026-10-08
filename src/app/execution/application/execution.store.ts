@@ -171,14 +171,14 @@ export class ExecutionStore {
   /**
    * Confirma que el carrier recogió la carga.
    */
-  confirmPickup(shipment: Shipment): Observable<Shipment> {
-    shipment.confirmPickup();
+  async confirmPickup(shipment: Shipment): Promise<void> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      return;
+    }
 
-    return this.persistShipment(
-      shipment,
-      'shipment.notification.pickup.summary',
-      'shipment.notification.pickup.detail'
-    );
+    shipment.confirmPickup();
+    await this.persistShipment(shipment);
   }
 
   /**
@@ -188,6 +188,11 @@ export class ExecutionStore {
     shipment: Shipment,
     location?: GeoLocation
   ): Observable<Shipment> {
+
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      throw new Error('execution.shipment-not-active');
+    }
 
     const newLocation = location ?? shipment.currentLocation;
 
@@ -222,24 +227,28 @@ export class ExecutionStore {
   /**
    * Confirma la entrega.
    */
-  confirmDelivery(
+  async confirmDelivery(
     shipment: Shipment,
     acknowledgeDistance = false
-  ): Observable<Shipment> {
+  ): Promise<void> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      return;
+    }
 
     shipment.confirmDelivery(acknowledgeDistance);
-
-    return this.persistShipment(
-      shipment,
-      'shipment.notification.delivery.summary',
-      'shipment.notification.delivery.detail'
-    );
+    await this.persistShipment(shipment);
   }
 
   /**
    * Confirma que el merchant recibió la carga.
    */
   confirmReception(shipment: Shipment): Observable<Shipment> {
+    if (!shipment.status.isActive) {
+      this.notificationStore.showError('El envío no se encuentra activo.');
+      throw new Error('execution.shipment-not-active');
+    }
+
     shipment.confirmReception();
 
     return this.persistShipment(
