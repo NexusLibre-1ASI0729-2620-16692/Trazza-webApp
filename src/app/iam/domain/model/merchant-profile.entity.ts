@@ -40,4 +40,10 @@ export class MerchantProfile {
   get ruc(): Ruc { return this._ruc; }
   get phone(): Phone { return this._phone; }
   get verified(): boolean { return this._verified; }
+
+  updateBusiness({ businessName, contactName, phone }: { businessName: string; contactName: string; phone: Phone }): void {
+    this._businessName = businessName.trim();
+    this._contactName = contactName.trim();
+    this._phone = phone;
+  }
 }
