@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  platformProviderApiBaseUrl: 'http://localhost:3000/api/v1',
+  platformProviderApiBaseUrl: 'http://YOUR_EC2_PUBLIC_IP:3000/api/v1',
   platformProviderUsersEndpointPath: '/users',
   platformProviderCarrierProfilesEndpointPath: '/carrier-profiles',
   platformProviderMerchantProfilesEndpointPath: '/merchant-profiles',
