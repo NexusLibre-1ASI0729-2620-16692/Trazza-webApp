@@ -55,6 +55,10 @@ export class ShipmentStatus {
     ].includes(this.#value);
   }
 
+  get isCancelled(): boolean {
+    return this.#value === ShipmentStatus.CANCELLED;
+  }
+
   get step(): number {
     const steps: Record<string, number> = {
       matched: 1,

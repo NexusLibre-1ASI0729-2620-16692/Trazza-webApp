@@ -63,7 +63,7 @@ export class ExecutionStore {
   readonly myFinishedShipments = computed(() =>
     this.myShipments().filter(shipment =>
       shipment.status.isDelivered ||
-      shipment.status.value === 'cancelled'
+      shipment.status.isCancelled
     )
   );
 
