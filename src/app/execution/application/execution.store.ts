@@ -122,6 +122,7 @@ export class ExecutionStore {
             'No se pudieron cargar los envíos.'
           );
 
+          this.loadedSignal.set(false);
           this.loadingSignal.set(false);
         }
       })
