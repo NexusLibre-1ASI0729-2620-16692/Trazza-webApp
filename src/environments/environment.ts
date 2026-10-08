@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  platformProviderApiBaseUrl: 'http://18.116.52.45/api/v1',
+  platformProviderApiBaseUrl: 'https://trazza-api2.duckdns.org/api/v1',
   platformProviderUsersEndpointPath: '/users',
   platformProviderCarrierProfilesEndpointPath: '/carrier-profiles',
   platformProviderMerchantProfilesEndpointPath: '/merchant-profiles',
