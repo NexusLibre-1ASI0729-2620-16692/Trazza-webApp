@@ -17,6 +17,7 @@ import {GeoLocation} from '../../shared/domain/model/geo-location.value-object';
 
 import {ExecutionApi} from '../infrastructure/execution-api';
 import {NotificationStore} from '../../shared/application/notification.store';
+import {IamStore} from '../../iam/application/iam.store';
 
 @Injectable({
   providedIn: 'root'
@@ -33,14 +34,27 @@ export class ExecutionStore {
   readonly error = this.errorSignal.asReadonly();
   readonly loaded = this.loadedSignal.asReadonly();
 
-  readonly myShipments = computed(() => this.shipments());
+  readonly myShipments = computed(() => {
+    const userId = this.iamStore.currentUserId();
+
+    if (userId === null) {
+      return [];
+    }
+
+    return this.shipments().filter(shipment =>
+      shipment.involves(userId)
+    );
+  });
 
   readonly myActiveShipments = computed(() =>
-    this.activeShipments()
+    this.myShipments().filter(shipment => shipment.status.isActive)
   );
 
   readonly myFinishedShipments = computed(() =>
-    this.finishedShipments()
+    this.myShipments().filter(shipment =>
+      shipment.status.isDelivered ||
+      shipment.status.value === 'cancelled'
+    )
   );
 
   /**
@@ -62,7 +76,8 @@ export class ExecutionStore {
 
   constructor(
     private readonly executionApi: ExecutionApi,
-    private readonly notificationStore: NotificationStore
+    private readonly notificationStore: NotificationStore,
+    private readonly iamStore: IamStore
   ) {}
 
   /**
