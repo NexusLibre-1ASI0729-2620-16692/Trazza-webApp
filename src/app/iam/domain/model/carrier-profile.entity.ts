@@ -41,4 +41,31 @@ export class CarrierProfile {
   get phone(): Phone { return this._phone; }
   get verified(): boolean { return this._verified; }
   get vehicles(): Vehicle[] { return this._vehicles; }
+
+  updateContact({ fullName, phone }: { fullName: string; phone: Phone }): void {
+    this._fullName = fullName.trim();
+    this._phone = phone;
+  }
+
+  addVehicle(vehicle: Vehicle): Vehicle {
+    const newId = this._vehicles.length > 0 ? Math.max(...this._vehicles.map(v => v.id ?? 0)) + 1 : 1;
+    vehicle.assignId(newId);
+    this._vehicles.push(vehicle);
+    return vehicle;
+  }
+
+  updateVehicle(vehicle: Vehicle): void {
+    const index = this._vehicles.findIndex(v => v.id === vehicle.id);
+    if (index !== -1) {
+      this._vehicles[index] = vehicle;
+    }
+  }
+
+  findVehicle(vehicleId: number): Vehicle | undefined {
+    return this._vehicles.find(v => v.id === vehicleId);
+  }
+
+  removeVehicle(vehicleId: number): void {
+    this._vehicles = this._vehicles.filter(v => v.id !== vehicleId);
+  }
 }
