@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
 import { SignInComponent } from './views/sign-in/sign-in.component';
+import { SignUpComponent } from './views/sign-up/sign-up.component';
 
 export const iamRoutes: Routes = [
   { path: 'sign-in', component: SignInComponent, title: 'Sign In - Trazza' },
-  // { path: 'sign-up', component: SignUpComponent, title: 'Sign Up - Trazza' },
+  { path: 'sign-up', component: SignUpComponent, title: 'Sign Up - Trazza' },
   // { path: 'profile', component: ProfileComponent, title: 'Profile' },
   // { path: 'vehicles', component: VehicleListComponent, title: 'Vehicles' },
   // { path: 'vehicles/new', component: VehicleFormComponent, title: 'New Vehicle' },
