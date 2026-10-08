@@ -337,19 +337,17 @@ export class ExecutionStore {
    */
   private upsertShipment(shipment: Shipment): void {
     this.shipmentsSignal.update(shipments => {
-
-      const index = shipments.findIndex(
+      const exists = shipments.some(
         current => current.id === shipment.id
       );
 
-      if (index === -1) {
+      if (!exists) {
         return [...shipments, shipment];
       }
 
-      const updated = [...shipments];
-      updated[index] = shipment;
-
-      return updated;
+      return shipments.map(current =>
+        current.id === shipment.id ? shipment : current
+      );
     });
   }
 }
