@@ -41,9 +41,19 @@ export class ExecutionStore {
       return [];
     }
 
-    return this.shipments().filter(shipment =>
-      shipment.involves(userId)
-    );
+    if (this.iamStore.isCarrier()) {
+      return this.shipments().filter(
+        shipment => shipment.carrierId === userId
+      );
+    }
+
+    if (this.iamStore.isMerchant()) {
+      return this.shipments().filter(
+        shipment => shipment.merchantId === userId
+      );
+    }
+
+    return [];
   });
 
   readonly myActiveShipments = computed(() =>
